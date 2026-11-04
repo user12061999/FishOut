@@ -1,0 +1,6 @@
+{
+  "name": "FishOut.Tests",
+  "references": ["FishOut.Runtime"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

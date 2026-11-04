@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f4bfdabea996d4dfd8737fd28b9a74b9
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 246121
+  packageName: 90+ Animated emojis 2D + Bubbles
+  packageVersion: 1.13
+  assetPath: Assets/90 Animated emojis 2D/Demo/Scripts/Demo.cs
+  uploadId: 700332

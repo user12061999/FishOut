@@ -1,0 +1,5 @@
+{
+  "name": "FishOut.PlayTests",
+  "references": ["FishOut.Runtime", "UnityEngine.UI"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

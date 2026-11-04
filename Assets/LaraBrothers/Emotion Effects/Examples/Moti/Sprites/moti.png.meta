@@ -1,0 +1,2978 @@
+fileFormatVersion: 2
+guid: daa1512b4b5444f6cbb495632eea2819
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 12
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 1
+  swizzle: 50462976
+  cookieLightType: 1
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: iPhone
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: 2
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: moti_0
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 2219
+        width: 201
+        height: 503
+      alignment: 9
+      pivot: {x: 0.5, y: 0.08036475}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9612e8968c190ef10800000000000000
+      internalID: 2296996099909362025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_1
+      rect:
+        serializedVersion: 2
+        x: 567
+        y: 2514
+        width: 123
+        height: 164
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e1a32b3b5bf711e0800000000000000
+      internalID: -2227035121458634270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_2
+      rect:
+        serializedVersion: 2
+        x: 944
+        y: 2510
+        width: 123
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 757ca98ffd450ee30800000000000000
+      internalID: 4530714546060052311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_3
+      rect:
+        serializedVersion: 2
+        x: 1730
+        y: 2330
+        width: 745
+        height: 496
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb314834509c1d680800000000000000
+      internalID: -8731977178049932357
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_4
+      rect:
+        serializedVersion: 2
+        x: 2705
+        y: 2621
+        width: 122
+        height: 110
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc33f53ef9daeb600800000000000000
+      internalID: 486016712028664781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_5
+      rect:
+        serializedVersion: 2
+        x: 3040
+        y: 2629
+        width: 119
+        height: 110
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 164a3f371bd873b60800000000000000
+      internalID: 7725799479071450209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_6
+      rect:
+        serializedVersion: 2
+        x: 3544
+        y: 2457
+        width: 119
+        height: 209
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b91d768be3960d250800000000000000
+      internalID: 5967385224368607643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_7
+      rect:
+        serializedVersion: 2
+        x: 3896
+        y: 2469
+        width: 123
+        height: 209
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00b735b9ab4802480800000000000000
+      internalID: -8925988524443600128
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_8
+      rect:
+        serializedVersion: 2
+        x: 2930
+        y: 2436
+        width: 123
+        height: 54
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 056c00d6a15c6aa40800000000000000
+      internalID: 5379203522229225040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_9
+      rect:
+        serializedVersion: 2
+        x: 3257
+        y: 2420
+        width: 123
+        height: 57
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f3f0e2a9ae236b50800000000000000
+      internalID: 6585158386262799344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_10
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 2272
+        width: 98
+        height: 48
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28d49253bbcd28800800000000000000
+      internalID: 613295195884703106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_11
+      rect:
+        serializedVersion: 2
+        x: 942
+        y: 2272
+        width: 102
+        height: 48
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0790b0049073286a0800000000000000
+      internalID: -6448531203572430480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_12
+      rect:
+        serializedVersion: 2
+        x: 1284
+        y: 2235
+        width: 61
+        height: 64
+      alignment: 9
+      pivot: {x: 0.8096964, y: 0.7350426}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d08a7f5d9be042b20800000000000000
+      internalID: 3108625834114000909
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_13
+      rect:
+        serializedVersion: 2
+        x: 1362
+        y: 2186
+        width: 77
+        height: 99
+      alignment: 9
+      pivot: {x: 0.5704679, y: 0.80130655}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5324f4dba666e6a0800000000000000
+      internalID: -6420331330571852962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_14
+      rect:
+        serializedVersion: 2
+        x: 2754
+        y: 2186
+        width: 77
+        height: 99
+      alignment: 9
+      pivot: {x: 0.4396275, y: 0.79874426}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36ae5280863f9b3a0800000000000000
+      internalID: -6649015746696975773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_15
+      rect:
+        serializedVersion: 2
+        x: 2849
+        y: 2235
+        width: 61
+        height: 64
+      alignment: 9
+      pivot: {x: 0.19598489, y: 0.7301903}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79e0f31dbe8c9f900800000000000000
+      internalID: 718826530695745175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_16
+      rect:
+        serializedVersion: 2
+        x: 3556
+        y: 2215
+        width: 123
+        height: 143
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e4afcd25a2a1a4d0800000000000000
+      internalID: -3125037836096527131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_17
+      rect:
+        serializedVersion: 2
+        x: 3900
+        y: 2203
+        width: 119
+        height: 147
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19d108434a9998d70800000000000000
+      internalID: 9045930257084849553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_18
+      rect:
+        serializedVersion: 2
+        x: 1157
+        y: 2162
+        width: 41
+        height: 37
+      alignment: 9
+      pivot: {x: 0.7209711, y: 0.61502326}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11fe55a275f5f2240800000000000000
+      internalID: 4769135358385712913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_19
+      rect:
+        serializedVersion: 2
+        x: 1791
+        y: 1510
+        width: 590
+        height: 709
+      alignment: 9
+      pivot: {x: 0.5, y: 0.056674715}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e20508f9d513ad70800000000000000
+      internalID: 9053103701857993444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_20
+      rect:
+        serializedVersion: 2
+        x: 2995
+        y: 2162
+        width: 41
+        height: 37
+      alignment: 9
+      pivot: {x: 0.28561476, y: 0.6230535}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc74b3d706b338730800000000000000
+      internalID: 4000106179639068621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_21
+      rect:
+        serializedVersion: 2
+        x: 538
+        y: 1932
+        width: 156
+        height: 226
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d14b1d0dab8b3dd0800000000000000
+      internalID: -2505255192336055853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_22
+      rect:
+        serializedVersion: 2
+        x: 821
+        y: 1932
+        width: 156
+        height: 226
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a339764c0ff3a550800000000000000
+      internalID: 6171056342614750118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_23
+      rect:
+        serializedVersion: 2
+        x: 1304
+        y: 2088
+        width: 33
+        height: 49
+      alignment: 9
+      pivot: {x: 0.5872285, y: 0.7177286}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82db66e390605d200800000000000000
+      internalID: 204075994886618408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_24
+      rect:
+        serializedVersion: 2
+        x: 1390
+        y: 2080
+        width: 33
+        height: 47
+      alignment: 9
+      pivot: {x: 0.4999926, y: 0.7113686}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39962a3e5e0a22570800000000000000
+      internalID: 8440485560872757651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_25
+      rect:
+        serializedVersion: 2
+        x: 1484
+        y: 2096
+        width: 33
+        height: 45
+      alignment: 9
+      pivot: {x: 0.42332134, y: 0.72941625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edd30f10b3c32c6a0800000000000000
+      internalID: -6430511093798388258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_26
+      rect:
+        serializedVersion: 2
+        x: 2676
+        y: 2096
+        width: 33
+        height: 45
+      alignment: 9
+      pivot: {x: 0.58951086, y: 0.7328939}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a82fcb559c8de2d40800000000000000
+      internalID: 5561620949087613578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_27
+      rect:
+        serializedVersion: 2
+        x: 2770
+        y: 2080
+        width: 33
+        height: 47
+      alignment: 9
+      pivot: {x: 0.5000074, y: 0.7032549}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe0c1f81f0c5c8950800000000000000
+      internalID: 6452633586027839727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_28
+      rect:
+        serializedVersion: 2
+        x: 2856
+        y: 2088
+        width: 33
+        height: 49
+      alignment: 9
+      pivot: {x: 0.4511349, y: 0.7144651}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d53a4316047db55b0800000000000000
+      internalID: -5378468658455207075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_29
+      rect:
+        serializedVersion: 2
+        x: 3564
+        y: 2010
+        width: 119
+        height: 115
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95e11683ccab80d50800000000000000
+      internalID: 6703813431622966873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_30
+      rect:
+        serializedVersion: 2
+        x: 3900
+        y: 2002
+        width: 123
+        height: 119
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5b7ad9d15a88a3c0800000000000000
+      internalID: -4348073356074255525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_31
+      rect:
+        serializedVersion: 2
+        x: 1284
+        y: 1985
+        width: 32
+        height: 54
+      alignment: 9
+      pivot: {x: 0.6152115, y: 0.75951016}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abc8628d371926490800000000000000
+      internalID: -7754475681644901190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_32
+      rect:
+        serializedVersion: 2
+        x: 1391
+        y: 1969
+        width: 31
+        height: 57
+      alignment: 9
+      pivot: {x: 0.5, y: 0.7655158}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3b148ee73ade87f0800000000000000
+      internalID: -608308965888746693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_33
+      rect:
+        serializedVersion: 2
+        x: 1513
+        y: 1985
+        width: 33
+        height: 50
+      alignment: 9
+      pivot: {x: 0.41221294, y: 0.76077634}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a873f698c970e8a0800000000000000
+      internalID: -6277883978121512793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_34
+      rect:
+        serializedVersion: 2
+        x: 2647
+        y: 1985
+        width: 33
+        height: 50
+      alignment: 9
+      pivot: {x: 0.58938503, y: 0.76045656}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96e89d22c45a62ce0800000000000000
+      internalID: -1430274085222773143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_35
+      rect:
+        serializedVersion: 2
+        x: 2771
+        y: 1969
+        width: 31
+        height: 57
+      alignment: 9
+      pivot: {x: 0.50000787, y: 0.7436652}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba593dd4969048a30800000000000000
+      internalID: 4216505499007554987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_36
+      rect:
+        serializedVersion: 2
+        x: 2877
+        y: 1985
+        width: 32
+        height: 54
+      alignment: 9
+      pivot: {x: 0.4037857, y: 0.7224144}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fa21a6f904723a90800000000000000
+      internalID: -7335673256891831567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_37
+      rect:
+        serializedVersion: 2
+        x: 141
+        y: 1436
+        width: 201
+        height: 503
+      alignment: 9
+      pivot: {x: 0.5, y: 0.08036475}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6b5a7bd449b36690800000000000000
+      internalID: -7610035239934862483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_38
+      rect:
+        serializedVersion: 2
+        x: 1071
+        y: 1826
+        width: 41
+        height: 37
+      alignment: 9
+      pivot: {x: 0.68566895, y: 0.32997584}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24e4af93144baf470800000000000000
+      internalID: 8429247844815883842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_39
+      rect:
+        serializedVersion: 2
+        x: 3081
+        y: 1826
+        width: 41
+        height: 37
+      alignment: 9
+      pivot: {x: 0.37913254, y: 0.3615195}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af4e61b6474323520800000000000000
+      internalID: 2680262402856379642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_40
+      rect:
+        serializedVersion: 2
+        x: 3560
+        y: 1723
+        width: 123
+        height: 172
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c99a713fc626d6040800000000000000
+      internalID: 4642475010963253660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_41
+      rect:
+        serializedVersion: 2
+        x: 3909
+        y: 1719
+        width: 122
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90b5764d6b9cf1620800000000000000
+      internalID: 2747136084804066057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_42
+      rect:
+        serializedVersion: 2
+        x: 915
+        y: 1748
+        width: 45
+        height: 32
+      alignment: 9
+      pivot: {x: 0.7588298, y: 0.47880173}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ca4e4bd6e4d91290800000000000000
+      internalID: -7919064381767398715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_43
+      rect:
+        serializedVersion: 2
+        x: 1009
+        y: 1740
+        width: 52
+        height: 36
+      alignment: 9
+      pivot: {x: 0.73911697, y: 0.51883954}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78614bdcace8867a0800000000000000
+      internalID: -6383695470112008569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_44
+      rect:
+        serializedVersion: 2
+        x: 1132
+        y: 1760
+        width: 74
+        height: 45
+      alignment: 9
+      pivot: {x: 0.74334717, y: 0.40697157}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e7fa09c1be553d30800000000000000
+      internalID: 4410535527754430434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_45
+      rect:
+        serializedVersion: 2
+        x: 2987
+        y: 1760
+        width: 74
+        height: 45
+      alignment: 9
+      pivot: {x: 0.25306827, y: 0.41614854}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0776166a30ee69050800000000000000
+      internalID: 5807090468984547184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_46
+      rect:
+        serializedVersion: 2
+        x: 3132
+        y: 1740
+        width: 52
+        height: 36
+      alignment: 9
+      pivot: {x: 0.30010986, y: 0.5247701}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4e2f7d84e810d580800000000000000
+      internalID: -8804509901603787186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_47
+      rect:
+        serializedVersion: 2
+        x: 3233
+        y: 1748
+        width: 45
+        height: 32
+      alignment: 9
+      pivot: {x: 0.277436, y: 0.4860649}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e98f595452490c00800000000000000
+      internalID: 867297333289650658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_48
+      rect:
+        serializedVersion: 2
+        x: 919
+        y: 1682
+        width: 45
+        height: 33
+      alignment: 9
+      pivot: {x: 0.7588284, y: 0.4794441}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2185a8afc99934280800000000000000
+      internalID: -9060229125841987566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_49
+      rect:
+        serializedVersion: 2
+        x: 1009
+        y: 1682
+        width: 54
+        height: 37
+      alignment: 9
+      pivot: {x: 0.73621964, y: 0.46333602}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c71323f7552c1a80800000000000000
+      internalID: -8494873737456052287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_50
+      rect:
+        serializedVersion: 2
+        x: 1104
+        y: 1674
+        width: 118
+        height: 49
+      alignment: 9
+      pivot: {x: 0.8562943, y: 0.5138413}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46e55906cd530a9d0800000000000000
+      internalID: -2765150950576005532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_51
+      rect:
+        serializedVersion: 2
+        x: 2971
+        y: 1674
+        width: 118
+        height: 49
+      alignment: 9
+      pivot: {x: 0.16625977, y: 0.53639686}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1419503e2d159f1c0800000000000000
+      internalID: -4469451188994731711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_52
+      rect:
+        serializedVersion: 2
+        x: 3130
+        y: 1682
+        width: 54
+        height: 37
+      alignment: 9
+      pivot: {x: 0.2889992, y: 0.48794803}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4eff05192b183b40800000000000000
+      internalID: 5420112014801370700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_53
+      rect:
+        serializedVersion: 2
+        x: 3229
+        y: 1682
+        width: 45
+        height: 33
+      alignment: 9
+      pivot: {x: 0.30716145, y: 0.4729781}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 049b14790a14537c0800000000000000
+      internalID: -4092292528407987904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_54
+      rect:
+        serializedVersion: 2
+        x: 919
+        y: 1621
+        width: 49
+        height: 33
+      alignment: 9
+      pivot: {x: 0.69546074, y: 0.5205522}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 253bceda45b2a57e0800000000000000
+      internalID: -1776059460349021358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_55
+      rect:
+        serializedVersion: 2
+        x: 1013
+        y: 1621
+        width: 50
+        height: 37
+      alignment: 9
+      pivot: {x: 0.74224854, y: 0.48166636}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f939ab4963ccf2b0800000000000000
+      internalID: -5549345783818929674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_56
+      rect:
+        serializedVersion: 2
+        x: 3130
+        y: 1621
+        width: 50
+        height: 37
+      alignment: 9
+      pivot: {x: 0.2764502, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9f1ca9d0cab712b0800000000000000
+      internalID: -5613813073045610593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_57
+      rect:
+        serializedVersion: 2
+        x: 3225
+        y: 1621
+        width: 49
+        height: 33
+      alignment: 9
+      pivot: {x: 0.33668488, y: 0.5135128}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb9d3587d7579e810800000000000000
+      internalID: 1795095108233976251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_58
+      rect:
+        serializedVersion: 2
+        x: 3560
+        y: 1486
+        width: 123
+        height: 147
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf1b64a3718fc6af0800000000000000
+      internalID: -401673488097168900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_59
+      rect:
+        serializedVersion: 2
+        x: 3904
+        y: 1490
+        width: 123
+        height: 147
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47af76978f3b0be80800000000000000
+      internalID: -8164828244652590476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_60
+      rect:
+        serializedVersion: 2
+        x: 1345
+        y: 1281
+        width: 508
+        height: 147
+      alignment: 9
+      pivot: {x: 0.97, y: 0.12}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b39ea204067487670800000000000000
+      internalID: 8536651572399761723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_61
+      rect:
+        serializedVersion: 2
+        x: 2033
+        y: 1318
+        width: 102
+        height: 127
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2578048}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81be721d0041ade10800000000000000
+      internalID: 2223111359802370840
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_62
+      rect:
+        serializedVersion: 2
+        x: 2369
+        y: 1285
+        width: 503
+        height: 143
+      alignment: 9
+      pivot: {x: 0.03, y: 0.12}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ec0d8d42842fe270800000000000000
+      internalID: 8281878381823069416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_63
+      rect:
+        serializedVersion: 2
+        x: 3573
+        y: 1354
+        width: 118
+        height: 25
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa7ccfa37ec65b0c0800000000000000
+      internalID: -4560619307259869270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_64
+      rect:
+        serializedVersion: 2
+        x: 3904
+        y: 1338
+        width: 119
+        height: 25
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3f5c45f20ba35f70800000000000000
+      internalID: 9174864895077539647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_65
+      rect:
+        serializedVersion: 2
+        x: 919
+        y: 1190
+        width: 49
+        height: 33
+      alignment: 9
+      pivot: {x: 0.70930076, y: 0.4999963}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e84102afdf88d850800000000000000
+      internalID: 6402025060965632227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_66
+      rect:
+        serializedVersion: 2
+        x: 1013
+        y: 1186
+        width: 50
+        height: 37
+      alignment: 9
+      pivot: {x: 0.7151172, y: 0.536664}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 647712937a0dfd940800000000000000
+      internalID: 5323202701211825990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_67
+      rect:
+        serializedVersion: 2
+        x: 1914
+        y: 764
+        width: 344
+        height: 500
+      alignment: 9
+      pivot: {x: 0.5, y: 0.08036475}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 970a9d5a6a8c261c0800000000000000
+      internalID: -4511823258599186311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_68
+      rect:
+        serializedVersion: 2
+        x: 3130
+        y: 1186
+        width: 50
+        height: 37
+      alignment: 9
+      pivot: {x: 0.2807391, y: 0.5241007}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a96fa5b1ce1096650800000000000000
+      internalID: 6226510073399277210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_69
+      rect:
+        serializedVersion: 2
+        x: 3225
+        y: 1190
+        width: 49
+        height: 33
+      alignment: 9
+      pivot: {x: 0.277436, y: 0.5426469}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7b2993fc887f73e0800000000000000
+      internalID: -2053790358280000643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_70
+      rect:
+        serializedVersion: 2
+        x: 3569
+        y: 1207
+        width: 118
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f3728403907990f0800000000000000
+      internalID: -1109732056431954951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_71
+      rect:
+        serializedVersion: 2
+        x: 3900
+        y: 1211
+        width: 119
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b441a1d1a519fa560800000000000000
+      internalID: 7327234934976418891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_72
+      rect:
+        serializedVersion: 2
+        x: 919
+        y: 1129
+        width: 45
+        height: 33
+      alignment: 9
+      pivot: {x: 0.7136108, y: 0.54110813}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 968766b90b7d66200800000000000000
+      internalID: 173062789221742697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_73
+      rect:
+        serializedVersion: 2
+        x: 1009
+        y: 1125
+        width: 54
+        height: 37
+      alignment: 9
+      pivot: {x: 0.73621964, y: 0.536664}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b75ff4d3106821b0800000000000000
+      internalID: -5681185291633731662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_74
+      rect:
+        serializedVersion: 2
+        x: 1104
+        y: 1117
+        width: 118
+        height: 53
+      alignment: 9
+      pivot: {x: 0.8562943, y: 0.5138413}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a46268d6c9737bd50800000000000000
+      internalID: 6752927311257282122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_75
+      rect:
+        serializedVersion: 2
+        x: 1333
+        y: 1027
+        width: 508
+        height: 147
+      alignment: 9
+      pivot: {x: 0.97, y: 0.87}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ac4fa1fc6c1ec440800000000000000
+      internalID: 4957931494018337953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_76
+      rect:
+        serializedVersion: 2
+        x: 2369
+        y: 1039
+        width: 503
+        height: 143
+      alignment: 9
+      pivot: {x: 0.025889099, y: 0.8844592}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42eab486684fae400800000000000000
+      internalID: 354364378814590500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_77
+      rect:
+        serializedVersion: 2
+        x: 2971
+        y: 1117
+        width: 118
+        height: 53
+      alignment: 9
+      pivot: {x: 0.1851517, y: 0.50841135}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a71a0a75aafd9350800000000000000
+      internalID: 6025247465115621283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_78
+      rect:
+        serializedVersion: 2
+        x: 3130
+        y: 1125
+        width: 54
+        height: 37
+      alignment: 9
+      pivot: {x: 0.2807391, y: 0.52410066}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d231b3bfda01605b0800000000000000
+      internalID: -5402612363553991891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_79
+      rect:
+        serializedVersion: 2
+        x: 3229
+        y: 1129
+        width: 45
+        height: 33
+      alignment: 9
+      pivot: {x: 0.277436, y: 0.54264694}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c7d71eaa98fc0c70800000000000000
+      internalID: 8938792703653042112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_80
+      rect:
+        serializedVersion: 2
+        x: 915
+        y: 1064
+        width: 45
+        height: 32
+      alignment: 9
+      pivot: {x: 0.7588284, y: 0.5635872}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42b3a132fd5666c30800000000000000
+      internalID: 4352278098941197092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_81
+      rect:
+        serializedVersion: 2
+        x: 1009
+        y: 1068
+        width: 52
+        height: 36
+      alignment: 9
+      pivot: {x: 0.7130315, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1da332c3968a610c0800000000000000
+      internalID: -4605308399005779247
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_82
+      rect:
+        serializedVersion: 2
+        x: 1132
+        y: 1039
+        width: 74
+        height: 45
+      alignment: 9
+      pivot: {x: 0.7250102, y: 0.58784723}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fed975898399572e0800000000000000
+      internalID: -2128626780509594129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_83
+      rect:
+        serializedVersion: 2
+        x: 2987
+        y: 1039
+        width: 74
+        height: 45
+      alignment: 9
+      pivot: {x: 0.2068333, y: 0.5977566}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 869622e6430b628d0800000000000000
+      internalID: -2871413973169575576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_84
+      rect:
+        serializedVersion: 2
+        x: 3132
+        y: 1068
+        width: 52
+        height: 36
+      alignment: 9
+      pivot: {x: 0.2829637, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47193ef531df5d490800000000000000
+      internalID: -7721987726401891980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_85
+      rect:
+        serializedVersion: 2
+        x: 3233
+        y: 1064
+        width: 45
+        height: 32
+      alignment: 9
+      pivot: {x: 0.277436, y: 0.5557327}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f861be26065d225f0800000000000000
+      internalID: -782828775255894385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_86
+      rect:
+        serializedVersion: 2
+        x: 3557
+        y: 916
+        width: 140
+        height: 217
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4dcf58e1236b66cb0800000000000000
+      internalID: -4871005620577895212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_87
+      rect:
+        serializedVersion: 2
+        x: 1071
+        y: 981
+        width: 41
+        height: 37
+      alignment: 9
+      pivot: {x: 0.66912395, y: 0.6883545}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33e7897b689588f50800000000000000
+      internalID: 6883850465576517171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_88
+      rect:
+        serializedVersion: 2
+        x: 3081
+        y: 981
+        width: 41
+        height: 37
+      alignment: 9
+      pivot: {x: 0.31538206, y: 0.6746298}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd700f7f4043f59a0800000000000000
+      internalID: -6242213362568001571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_89
+      rect:
+        serializedVersion: 2
+        x: 3898
+        y: 919
+        width: 140
+        height: 217
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f74fc0210e7983ad0800000000000000
+      internalID: -2722258986114157441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_90
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 498
+        width: 180
+        height: 410
+      alignment: 9
+      pivot: {x: 0.5, y: 0.8533757}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d46a77f554b53b380800000000000000
+      internalID: -8956714880397236659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_91
+      rect:
+        serializedVersion: 2
+        x: 465
+        y: 490
+        width: 184
+        height: 409
+      alignment: 9
+      pivot: {x: 0.5, y: 0.8533757}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44181d0415accd0a0800000000000000
+      internalID: -6855382082436103868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_92
+      rect:
+        serializedVersion: 2
+        x: 1284
+        y: 805
+        width: 32
+        height: 54
+      alignment: 9
+      pivot: {x: 0.5940132, y: 0.30585283}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f37ac3eb818fcf10800000000000000
+      internalID: 2292193173177005041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_93
+      rect:
+        serializedVersion: 2
+        x: 1391
+        y: 818
+        width: 31
+        height: 57
+      alignment: 9
+      pivot: {x: 0.49999607, y: 0.29749498}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aac114cd44b95fee0800000000000000
+      internalID: -1227904603333256022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_94
+      rect:
+        serializedVersion: 2
+        x: 1513
+        y: 809
+        width: 33
+        height: 50
+      alignment: 9
+      pivot: {x: 0.40276915, y: 0.26348633}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b369cd2ac9ef44600800000000000000
+      internalID: 451765811344610875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_95
+      rect:
+        serializedVersion: 2
+        x: 2647
+        y: 809
+        width: 33
+        height: 50
+      alignment: 9
+      pivot: {x: 0.59938, y: 0.24940063}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7085830e7ba40ed50800000000000000
+      internalID: 6764488793911744519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_96
+      rect:
+        serializedVersion: 2
+        x: 2771
+        y: 818
+        width: 31
+        height: 57
+      alignment: 9
+      pivot: {x: 0.50000787, y: 0.27964488}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0938c2f3165e96000800000000000000
+      internalID: 29807078389089168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_97
+      rect:
+        serializedVersion: 2
+        x: 2877
+        y: 805
+        width: 32
+        height: 54
+      alignment: 9
+      pivot: {x: 0.4037857, y: 0.28529188}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b2ed5a901dc36110800000000000000
+      internalID: 1253070592532144825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_98
+      rect:
+        serializedVersion: 2
+        x: 1304
+        y: 707
+        width: 33
+        height: 49
+      alignment: 9
+      pivot: {x: 0.60833555, y: 0.31226957}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5835db9e07c699f0800000000000000
+      internalID: -461963046200985506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_99
+      rect:
+        serializedVersion: 2
+        x: 1390
+        y: 717
+        width: 33
+        height: 47
+      alignment: 9
+      pivot: {x: 0.5205522, y: 0.28863394}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7efef2b9e01cd520800000000000000
+      internalID: 2728074070196158074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_100
+      rect:
+        serializedVersion: 2
+        x: 1484
+        y: 703
+        width: 33
+        height: 45
+      alignment: 9
+      pivot: {x: 0.41221294, y: 0.2707316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 200798fedd2baa500800000000000000
+      internalID: 408335382506729474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_101
+      rect:
+        serializedVersion: 2
+        x: 2676
+        y: 703
+        width: 33
+        height: 45
+      alignment: 9
+      pivot: {x: 0.5792495, y: 0.2828369}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f852ac3e2eb1c72f0800000000000000
+      internalID: -973872758120634993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_102
+      rect:
+        serializedVersion: 2
+        x: 2770
+        y: 717
+        width: 33
+        height: 47
+      alignment: 9
+      pivot: {x: 0.5201379, y: 0.29675162}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de3b852253949a570800000000000000
+      internalID: 8478388266060002285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_103
+      rect:
+        serializedVersion: 2
+        x: 2856
+        y: 707
+        width: 33
+        height: 49
+      alignment: 9
+      pivot: {x: 0.44063684, y: 0.29909718}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff90afc2a1823cdf0800000000000000
+      internalID: -161241068766361089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_104
+      rect:
+        serializedVersion: 2
+        x: 3548
+        y: 674
+        width: 111
+        height: 70
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fb35ac26e45c9aa0800000000000000
+      internalID: -6152949643326702604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_105
+      rect:
+        serializedVersion: 2
+        x: 3929
+        y: 662
+        width: 110
+        height: 69
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd76480b7abd46df0800000000000000
+      internalID: -187783771175229475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_106
+      rect:
+        serializedVersion: 2
+        x: 1157
+        y: 645
+        width: 41
+        height: 37
+      alignment: 9
+      pivot: {x: 0.73530096, y: 0.4033071}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf282d93e7f8cfbd0800000000000000
+      internalID: -2595041512973499653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_107
+      rect:
+        serializedVersion: 2
+        x: 1362
+        y: 559
+        width: 77
+        height: 99
+      alignment: 9
+      pivot: {x: 0.57047105, y: 0.21239309}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8bf58b63ffdf61b0800000000000000
+      internalID: -5661059970007434354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_108
+      rect:
+        serializedVersion: 2
+        x: 2754
+        y: 559
+        width: 77
+        height: 99
+      alignment: 9
+      pivot: {x: 0.44824854, y: 0.22809455}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 316cecd0a2c515b80800000000000000
+      internalID: -8407837693633968621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_109
+      rect:
+        serializedVersion: 2
+        x: 2995
+        y: 645
+        width: 41
+        height: 37
+      alignment: 9
+      pivot: {x: 0.28199434, y: 0.37695643}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a44270e0532585c30800000000000000
+      internalID: 4348315828048307274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_110
+      rect:
+        serializedVersion: 2
+        x: 3216
+        y: 645
+        width: 181
+        height: 46
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a678470193c484f10800000000000000
+      internalID: 2254135421471852394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_111
+      rect:
+        serializedVersion: 2
+        x: 1284
+        y: 545
+        width: 61
+        height: 64
+      alignment: 9
+      pivot: {x: 0.7776079, y: 0.3073492}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 269fef1c872874cb0800000000000000
+      internalID: -4879788216070243998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_112
+      rect:
+        serializedVersion: 2
+        x: 1828
+        y: 207
+        width: 180
+        height: 410
+      alignment: 9
+      pivot: {x: 0.5, y: 0.8533757}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6700eb36ecae7130800000000000000
+      internalID: 3566478059771004778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_113
+      rect:
+        serializedVersion: 2
+        x: 2131
+        y: 203
+        width: 180
+        height: 406
+      alignment: 9
+      pivot: {x: 0.5, y: 0.8533757}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2922625b1216e8640800000000000000
+      internalID: 5084107826748859026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_114
+      rect:
+        serializedVersion: 2
+        x: 2848
+        y: 545
+        width: 61
+        height: 64
+      alignment: 9
+      pivot: {x: 0.22551389, y: 0.29057026}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f465833e10fc3cbc0800000000000000
+      internalID: -3763937256537565617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_115
+      rect:
+        serializedVersion: 2
+        x: 3290
+        y: 465
+        width: 78
+        height: 70
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2054b53cb3b81bc40800000000000000
+      internalID: 5526351306557179138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_116
+      rect:
+        serializedVersion: 2
+        x: 3577
+        y: 408
+        width: 78
+        height: 106
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 929b2991b52f6f180800000000000000
+      internalID: -9081805125461034711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_117
+      rect:
+        serializedVersion: 2
+        x: 3925
+        y: 457
+        width: 122
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0f930f9b0956d2b0800000000000000
+      internalID: -5560158783494971637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_118
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 35
+        width: 134
+        height: 319
+      alignment: 9
+      pivot: {x: 0.58885, y: 0.8445826}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ac8eed7984b69ef0800000000000000
+      internalID: -101695438952952669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_119
+      rect:
+        serializedVersion: 2
+        x: 526
+        y: 59
+        width: 135
+        height: 320
+      alignment: 9
+      pivot: {x: 0.4228317, y: 0.8445826}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35508588df56c3240800000000000000
+      internalID: 4772801844694484307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_120
+      rect:
+        serializedVersion: 2
+        x: 1587
+        y: 43
+        width: 135
+        height: 320
+      alignment: 9
+      pivot: {x: 0.54566336, y: 0.84458256}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12b15422916cfc700800000000000000
+      internalID: 562886289696037665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_121
+      rect:
+        serializedVersion: 2
+        x: 2373
+        y: 47
+        width: 135
+        height: 316
+      alignment: 9
+      pivot: {x: 0.42283168, y: 0.84458256}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f73fabe4850725c80800000000000000
+      internalID: -8335476435729058945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_122
+      rect:
+        serializedVersion: 2
+        x: 3274
+        y: 329
+        width: 98
+        height: 46
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e34e59d444749300800000000000000
+      internalID: 257958917720392673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_123
+      rect:
+        serializedVersion: 2
+        x: 788
+        y: 129
+        width: 250
+        height: 205
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a233596d79b13e90800000000000000
+      internalID: -7047647993569004892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_124
+      rect:
+        serializedVersion: 2
+        x: 1230
+        y: 117
+        width: 250
+        height: 209
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0bbba474ea69d670800000000000000
+      internalID: 8563993695864208140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_125
+      rect:
+        serializedVersion: 2
+        x: 3574
+        y: 268
+        width: 97
+        height: 41
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f14e64ea909aa5ef0800000000000000
+      internalID: -118596581128215521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_126
+      rect:
+        serializedVersion: 2
+        x: 3941
+        y: 264
+        width: 98
+        height: 41
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31d335d2733a33600800000000000000
+      internalID: 446880245418769683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_127
+      rect:
+        serializedVersion: 2
+        x: 3573
+        y: 84
+        width: 98
+        height: 33
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac66038470fb5e8b0800000000000000
+      internalID: -5123478963067263286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: moti_128
+      rect:
+        serializedVersion: 2
+        x: 3945
+        y: 105
+        width: 94
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f141e468c2dd43d0800000000000000
+      internalID: -3220686400372260364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      moti_0: 2296996099909362025
+      moti_1: -2227035121458634270
+      moti_10: 613295195884703106
+      moti_100: 408335382506729474
+      moti_101: -973872758120634993
+      moti_102: 8478388266060002285
+      moti_103: -161241068766361089
+      moti_104: -6152949643326702604
+      moti_105: -187783771175229475
+      moti_106: -2595041512973499653
+      moti_107: -5661059970007434354
+      moti_108: -8407837693633968621
+      moti_109: 4348315828048307274
+      moti_11: -6448531203572430480
+      moti_110: 2254135421471852394
+      moti_111: -4879788216070243998
+      moti_112: 3566478059771004778
+      moti_113: 5084107826748859026
+      moti_114: -3763937256537565617
+      moti_115: 5526351306557179138
+      moti_116: -9081805125461034711
+      moti_117: -5560158783494971637
+      moti_118: -101695438952952669
+      moti_119: 4772801844694484307
+      moti_12: 3108625834114000909
+      moti_120: 562886289696037665
+      moti_121: -8335476435729058945
+      moti_122: 257958917720392673
+      moti_123: -7047647993569004892
+      moti_124: 8563993695864208140
+      moti_125: -118596581128215521
+      moti_126: 446880245418769683
+      moti_127: -5123478963067263286
+      moti_128: -3220686400372260364
+      moti_13: -6420331330571852962
+      moti_14: -6649015746696975773
+      moti_15: 718826530695745175
+      moti_16: -3125037836096527131
+      moti_17: 9045930257084849553
+      moti_18: 4769135358385712913
+      moti_19: 9053103701857993444
+      moti_2: 4530714546060052311
+      moti_20: 4000106179639068621
+      moti_21: -2505255192336055853
+      moti_22: 6171056342614750118
+      moti_23: 204075994886618408
+      moti_24: 8440485560872757651
+      moti_25: -6430511093798388258
+      moti_26: 5561620949087613578
+      moti_27: 6452633586027839727
+      moti_28: -5378468658455207075
+      moti_29: 6703813431622966873
+      moti_3: -8731977178049932357
+      moti_30: -4348073356074255525
+      moti_31: -7754475681644901190
+      moti_32: -608308965888746693
+      moti_33: -6277883978121512793
+      moti_34: -1430274085222773143
+      moti_35: 4216505499007554987
+      moti_36: -7335673256891831567
+      moti_37: -7610035239934862483
+      moti_38: 8429247844815883842
+      moti_39: 2680262402856379642
+      moti_4: 486016712028664781
+      moti_40: 4642475010963253660
+      moti_41: 2747136084804066057
+      moti_42: -7919064381767398715
+      moti_43: -6383695470112008569
+      moti_44: 4410535527754430434
+      moti_45: 5807090468984547184
+      moti_46: -8804509901603787186
+      moti_47: 867297333289650658
+      moti_48: -9060229125841987566
+      moti_49: -8494873737456052287
+      moti_5: 7725799479071450209
+      moti_50: -2765150950576005532
+      moti_51: -4469451188994731711
+      moti_52: 5420112014801370700
+      moti_53: -4092292528407987904
+      moti_54: -1776059460349021358
+      moti_55: -5549345783818929674
+      moti_56: -5613813073045610593
+      moti_57: 1795095108233976251
+      moti_58: -401673488097168900
+      moti_59: -8164828244652590476
+      moti_6: 5967385224368607643
+      moti_60: 8536651572399761723
+      moti_61: 2223111359802370840
+      moti_62: 8281878381823069416
+      moti_63: -4560619307259869270
+      moti_64: 9174864895077539647
+      moti_65: 6402025060965632227
+      moti_66: 5323202701211825990
+      moti_67: -4511823258599186311
+      moti_68: 6226510073399277210
+      moti_69: -2053790358280000643
+      moti_7: -8925988524443600128
+      moti_70: -1109732056431954951
+      moti_71: 7327234934976418891
+      moti_72: 173062789221742697
+      moti_73: -5681185291633731662
+      moti_74: 6752927311257282122
+      moti_75: 4957931494018337953
+      moti_76: 354364378814590500
+      moti_77: 6025247465115621283
+      moti_78: -5402612363553991891
+      moti_79: 8938792703653042112
+      moti_8: 5379203522229225040
+      moti_80: 4352278098941197092
+      moti_81: -4605308399005779247
+      moti_82: -2128626780509594129
+      moti_83: -2871413973169575576
+      moti_84: -7721987726401891980
+      moti_85: -782828775255894385
+      moti_86: -4871005620577895212
+      moti_87: 6883850465576517171
+      moti_88: -6242213362568001571
+      moti_89: -2722258986114157441
+      moti_9: 6585158386262799344
+      moti_90: -8956714880397236659
+      moti_91: -6855382082436103868
+      moti_92: 2292193173177005041
+      moti_93: -1227904603333256022
+      moti_94: 451765811344610875
+      moti_95: 6764488793911744519
+      moti_96: 29807078389089168
+      moti_97: 1253070592532144825
+      moti_98: -461963046200985506
+      moti_99: 2728074070196158074
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,5 @@
+{
+  "name": "FishOut.Runtime",
+  "references": ["UnityEngine.UI", "Unity.InputSystem"],
+  "autoReferenced": true
+}
