@@ -51,10 +51,10 @@ namespace FishOut
     {
         public readonly int fishId;
         public readonly Vector2Int from, to;
-        public readonly bool exits, hitsCrab;
+        public readonly bool exits, hitsCrab, hitsRock;
         public bool ChangesBoard => exits || from != to;
-        public MoveResult(int id, Vector2Int start, Vector2Int end, bool escape, bool crab)
-        { fishId = id; from = start; to = end; exits = escape; hitsCrab = crab; }
+        public MoveResult(int id, Vector2Int start, Vector2Int end, bool escape, bool crab, bool rock = false)
+        { fishId = id; from = start; to = end; exits = escape; hitsCrab = crab; hitsRock = rock; }
     }
 
     public sealed class BoardPath
@@ -78,6 +78,13 @@ namespace FishOut
         public bool IsFailed => Lives == 0;
         public IReadOnlyList<FishData> Fish => fish;
         private readonly List<FishData> fish;
+        // A fish that has paid a crab's life toll may swim past crabs from then on.
+        private readonly HashSet<int> tollPaid = new HashSet<int>();
+        // A rock cracks on the first hit; the next fish to reach it breaks through.
+        private readonly HashSet<Vector2Int> cracked = new HashSet<Vector2Int>();
+        private readonly HashSet<Vector2Int> broken = new HashSet<Vector2Int>();
+        public bool IsCracked(Vector2Int cell) => cracked.Contains(cell);
+        public bool IsBroken(Vector2Int cell) => broken.Contains(cell);
         public BoardState(LevelData level)
         {
             Level = level;
@@ -130,8 +137,14 @@ namespace FishOut
                 }
                 if (fish.Any(other => other.id != id && other.cell == candidate))
                     return new MoveResult(id, f.cell, next, false, false);
-                var obstacle = Level.obstacles.Find(o => o.cell == candidate);
-                if (obstacle != null) return new MoveResult(id, f.cell, next, false, obstacle.kind == ObstacleKind.Crab);
+                var obstacle = Level.obstacles.Find(o => o.cell == candidate && !broken.Contains(o.cell));
+                if (obstacle != null)
+                {
+                    if (obstacle.kind == ObstacleKind.Crab && !tollPaid.Contains(id))
+                        return new MoveResult(id, f.cell, next, false, true);
+                    if (obstacle.kind == ObstacleKind.Rock && !cracked.Contains(candidate))
+                        return new MoveResult(id, f.cell, next, false, false, true);
+                }
                 next = candidate;
                 cells?.Add(next);
             }
@@ -140,11 +153,34 @@ namespace FishOut
         public MoveResult Move(int id)
         {
             if (IsFailed || IsClear) throw new InvalidOperationException("Stage has ended");
-            var result = Preview(id);
+            var trace = new List<Vector2Int>();
+            var result = TraceForward(id, trace);
+            foreach (var cell in trace) if (cracked.Contains(cell)) broken.Add(cell);
+            if (result.hitsRock) cracked.Add(result.to + Direction(Find(id).facing));
             if (result.exits) fish.Remove(Find(id));
             else Find(id).cell = result.to;
-            if (result.hitsCrab) Lives = Math.Max(0, Lives - 1);
+            if (result.hitsCrab) { Lives = Math.Max(0, Lives - 1); tollPaid.Add(id); }
             return result;
+        }
+        // Touching fish facing the same way form one line. Once its front fish can escape, the
+        // whole line goes, front first. Empty when the line cannot escape.
+        public List<int> EscapingLine(int id)
+        {
+            var line = new List<int>();
+            var tapped = Find(id) ?? throw new ArgumentException("Unknown fish");
+            var step = Direction(tapped.facing);
+            var head = tapped;
+            for (var ahead = FishAt(head.cell + step, tapped.facing); ahead != null; ahead = FishAt(head.cell + step, tapped.facing)) head = ahead;
+            if (!Preview(head.id).exits) return line;
+            for (var member = head; member != null; member = FishAt(member.cell - step, tapped.facing)) line.Add(member.id);
+            return line;
+        }
+        private FishData FishAt(Vector2Int cell, Facing facing) => fish.Find(f => f.cell == cell && f.facing == facing);
+        // The fish directly ahead, if that is what is holding this one in place.
+        public FishData BlockerOf(int id)
+        {
+            var f = Find(id);
+            return f == null ? null : fish.Find(other => other.cell == f.cell + Direction(f.facing));
         }
         public int FindEscapingFish()
         {
@@ -155,6 +191,8 @@ namespace FishOut
         {
             if (HintUsed || IsFailed || IsClear) return -1;
             var id = FindEscapingFish();
+            // With nobody free, point at a fish that can make progress by hitting a rock.
+            if (id < 0) foreach (var f in fish) if (Preview(f.id).hitsRock) { id = f.id; break; }
             if (id >= 0) HintUsed = true;
             return id;
         }
@@ -170,7 +208,7 @@ namespace FishOut
             get
             {
                 if (IsClear || IsFailed) return false;
-                foreach (var f in fish) if (Preview(f.id).ChangesBoard) return false;
+                foreach (var f in fish) { var move = Preview(f.id); if (move.ChangesBoard || move.hitsCrab || move.hitsRock) return false; }
                 return true;
             }
         }

@@ -1,49 +1,57 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace FishOut
 {
     public sealed class FishOutAudio : MonoBehaviour
     {
+        // A line of fish starts together, so a cue may only retrigger after this gap.
+        private const float RetriggerGap=.07f;
+        private const int GateVoices=4,GatePitchSteps=7;
+        private const float GateResetGap=.5f;
         private AudioSource effects, music;
-        private AudioClip swim, bump, danger, clear, loop;
+        private readonly AudioSource[] gateVoices=new AudioSource[GateVoices];
+        private readonly Dictionary<string,AudioClip> clips=new Dictionary<string,AudioClip>();
+        private readonly Dictionary<string,float> lastPlayed=new Dictionary<string,float>();
         private bool enabledEffects;
+        private int gateStep,gateVoice;
+        private float lastGate=float.NegativeInfinity;
         public void Initialize(bool sound, bool background)
         {
-            effects=gameObject.AddComponent<AudioSource>(); effects.playOnAwake=false; effects.volume=.25f;
-            music=gameObject.AddComponent<AudioSource>(); music.playOnAwake=false; music.loop=true; music.volume=.10f;
-            swim=Tone("Swim",560,850,.12f); bump=Tone("Bump",210,110,.11f);
-            danger=Tone("Crab warning",160,90,.25f); clear=Tone("Clear",440,1100,.5f);
-            const int rate=22050; var data=new float[rate*16];
-            var notes=new[]{261.63f,329.63f,392f,329.63f,293.66f,349.23f,440f,349.23f};
-            for(int i=0;i<data.Length;i++)
+            effects=gameObject.AddComponent<AudioSource>(); effects.playOnAwake=false; effects.volume=.7f;
+            music=gameObject.AddComponent<AudioSource>(); music.playOnAwake=false; music.loop=true; music.volume=.3f;
+            music.clip=Resources.Load<AudioClip>("Audio/bgm");
+            for(int i=0;i<gateVoices.Length;i++)
             {
-                float t=(float)i/rate; int beat=(int)(t/2); float p=(t%2)/2;
-                float envelope=Mathf.Sin(p*Mathf.PI); float frequency=notes[beat%notes.Length];
-                data[i]=Mathf.Sin(2*Mathf.PI*frequency*t)*envelope*.18f+Mathf.Sin(2*Mathf.PI*130.815f*t)*.025f;
+                gateVoices[i]=gameObject.AddComponent<AudioSource>(); gateVoices[i].playOnAwake=false; gateVoices[i].volume=.7f;
             }
-            loop=AudioClip.Create("Lagoon ambient loop",data.Length,1,rate,false); loop.SetData(data,0); music.clip=loop;
             SetSound(sound); SetMusic(background);
-        }
-        private AudioClip Tone(string name,float from,float to,float duration)
-        {
-            const int rate=22050; var data=new float[Mathf.CeilToInt(rate*duration)]; float phase=0;
-            for(int i=0;i<data.Length;i++)
-            {
-                float p=(float)i/data.Length; phase+=2*Mathf.PI*Mathf.Lerp(from,to,p)/rate;
-                data[i]=Mathf.Sin(phase)*Mathf.Sin(p*Mathf.PI)*.45f;
-            }
-            var clip=AudioClip.Create(name,data.Length,1,rate,false);clip.SetData(data,0);return clip;
         }
         public void SetSound(bool value) { enabledEffects=value; if(!value&&effects)effects.Stop(); }
         public void SetMusic(bool value) { if(!music)return; if(value){if(!music.isPlaying)music.Play();}else music.Stop(); }
+        // Cue names match the files in Resources/Audio.
         public void Play(string cue)
         {
             if(!enabledEffects||!effects)return;
-            effects.PlayOneShot(cue=="clear"?clear:cue=="danger"?danger:cue=="bump"?bump:swim);
+            if(lastPlayed.TryGetValue(cue,out var last)&&Time.unscaledTime-last<RetriggerGap)return;
+            lastPlayed[cue]=Time.unscaledTime;
+            var clip=Clip(cue);
+            if(clip)effects.PlayOneShot(clip);
         }
-        private void OnDestroy()
+        // Each fish entering soon after the last sounds a semitone higher, so a long line climbs.
+        public void PlayGate()
         {
-            foreach(var clip in new[]{swim,bump,danger,clear,loop})if(clip)Destroy(clip);
+            if(!enabledEffects||!effects)return;
+            gateStep=Time.unscaledTime-lastGate>GateResetGap?0:Mathf.Min(gateStep+1,GatePitchSteps);
+            lastGate=Time.unscaledTime;
+            var clip=Clip("entrance");if(!clip)return;
+            var voice=gateVoices[gateVoice];gateVoice=(gateVoice+1)%gateVoices.Length;
+            voice.pitch=Mathf.Pow(2,gateStep/12f);voice.PlayOneShot(clip);
+        }
+        private AudioClip Clip(string cue)
+        {
+            if(!clips.TryGetValue(cue,out var clip))clips[cue]=clip=Resources.Load<AudioClip>("Audio/"+cue);
+            return clip;
         }
     }
 }

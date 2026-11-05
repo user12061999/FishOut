@@ -6,10 +6,12 @@ namespace FishOut
 {
     public sealed class FishOutWorld : MonoBehaviour
     {
-        private Material sand, water, stone, glow, bubble;
+        private Material sand, water, stone, glow;
         private readonly List<Material> owned = new List<Material>();
         private Transform pieces;
         private LevelData level;
+        private readonly Dictionary<Vector2Int,List<GameObject>> rocks=new Dictionary<Vector2Int,List<GameObject>>();
+        private readonly HashSet<Vector2Int> shownCracked=new HashSet<Vector2Int>();
         public readonly Dictionary<int,FishActor> actors = new Dictionary<int,FishActor>();
         public Vector3 Cell(Vector2Int p) => new Vector3(p.x-(level==null?5:level.width-1)*.5f,.10f,p.y-(level==null?7:level.height-1)*.5f);
         public void Build(FishOutGame game, BoardState board)
@@ -17,13 +19,13 @@ namespace FishOut
             level=board.Level;
             sand=Mat("Lagoon sand",new Color(.60f,.83f,.74f));
             water=Mat("Ocean",new Color(.055f,.39f,.49f));
-            if(level.showcase)water.color=new Color(.27f,.52f,.40f);
+            if(level.showcase)water.color=new Color(.06f,.45f,.58f);
             stone=Mat("Rock",new Color(.32f,.49f,.49f));
             glow=Mat("Selection",new Color(.95f,.91f,.38f));
-            bubble=Mat("Bubbles",new Color(.63f,.96f,1f));
-            Primitive("Ocean floor",PrimitiveType.Cube,new Vector3(0,-.60f,0),new Vector3(80,.3f,80),water,false);
-            if(level.showcase)gameObject.AddComponent<ShowcaseScenery>().Build(level,Cell);
-            else Primitive("Lagoon board",PrimitiveType.Cube,new Vector3(0,-.23f,0),new Vector3(6.4f,.35f,8.4f),sand,false);
+            ShowcaseScenery scenery=null;
+            if(level.showcase){scenery=gameObject.AddComponent<ShowcaseScenery>();scenery.Build(level,Cell);}
+            else Primitive("Ocean floor",PrimitiveType.Cube,new Vector3(0,-.60f,0),new Vector3(80,.3f,80),water,false);
+            if(!level.showcase)Primitive("Lagoon board",PrimitiveType.Cube,new Vector3(0,-.23f,0),new Vector3(6.4f,.35f,8.4f),sand,false);
             // The rim indicates the board boundary; it never blocks any of the four exits.
             var rim=new GameObject("Open board boundary"); rim.transform.SetParent(transform,false);
             var line=rim.AddComponent<LineRenderer>(); line.useWorldSpace=false; line.loop=true; line.positionCount=4;
@@ -36,23 +38,32 @@ namespace FishOut
                 if(o.kind==ObstacleKind.Crab)
                 {
                     var crab=Model(game.crabPrefab,pieces,.84f,game.characterAnimations,3); crab.name="Crab hazard"; crab.transform.position=Cell(o.cell);
-                    var warning=Primitive("Danger marker",PrimitiveType.Cylinder,Cell(o.cell)+Vector3.down*.07f,new Vector3(.79f,.015f,.79f),Mat("Crab danger",new Color(.98f,.35f,.23f)),false);
+                    var warning=Primitive("Danger marker",PrimitiveType.Cylinder,Cell(o.cell)+Vector3.down*.07f,new Vector3(.95f,.015f,.95f),Mat("Crab danger",new Color(.98f,.35f,.23f)),false);
                     warning.transform.SetParent(pieces,true);
                 }
                 else
                 {
                     var rock=Primitive("Rock",PrimitiveType.Sphere,Cell(o.cell)+Vector3.up*.16f,new Vector3(.87f,.60f,.83f),stone,true);
                     rock.transform.rotation=Quaternion.Euler(11,37,9); rock.transform.SetParent(pieces,true);
-                    Primitive("Rock cap",PrimitiveType.Sphere,Cell(o.cell)+new Vector3(.12f,.41f,.08f),new Vector3(.45f,.22f,.42f),stone,false).transform.SetParent(pieces,true);
+                    var cap=Primitive("Rock cap",PrimitiveType.Sphere,Cell(o.cell)+new Vector3(.12f,.41f,.08f),new Vector3(.45f,.22f,.42f),stone,false);cap.transform.SetParent(pieces,true);
+                    rocks[o.cell]=new List<GameObject>{rock,cap};
                 }
             }
+            var batcher=gameObject.AddComponent<FishBatcher>();
             foreach(var data in board.Fish)
             {
                 var root=new GameObject("Fish "+data.id); root.transform.SetParent(pieces,false); root.transform.position=Cell(data.cell);
                 root.transform.rotation=Quaternion.Euler(0,(int)data.facing*90f,0);
-                var prefab=level.showcase?Resources.Load<GameObject>("Reef/Fish"+new[]{"Blue","Green","Purple","Red","Yellow"}[data.appearance]):game.fishPrefabs[data.appearance%game.fishPrefabs.Length];
+                var prefab=game.fishPrefabs[data.appearance%game.fishPrefabs.Length];
                 if(!prefab)prefab=game.fishPrefabs[0];
-                var model=Model(prefab,root.transform,level.showcase?.78f:.83f,game.characterAnimations,level.showcase?0:(data.appearance%game.fishPrefabs.Length)/3);
+                var model=Model(prefab,root.transform,level.showcase?.95f:.83f,game.characterAnimations,(data.appearance%game.fishPrefabs.Length)/3);
+                if(scenery)batcher.AddShadow(scenery.ShadowQuad,scenery.ShadowMaterial,root.transform);
+                foreach(var face in model.GetComponentsInChildren<MeshRenderer>())
+                {
+                    var mesh=face.GetComponent<MeshFilter>().sharedMesh;var material=face.sharedMaterial;
+                    if(!mesh||mesh.subMeshCount!=1||!material||!material.enableInstancing)continue;
+                    batcher.AddPart(mesh,material,face.transform);face.enabled=false;
+                }
                 var actor=root.AddComponent<FishActor>(); actor.Configure(data.id,model.transform,glow);
                 actors.Add(data.id,actor);
                 // A collider per visible renderer covers the whole body without a large cell-sized hit target.
@@ -97,18 +108,44 @@ namespace FishOut
             instance.transform.localPosition=new Vector3(-center.x*factor,(-center.y+bounds.size.y*.5f)*factor,-center.z*factor);
             return holder;
         }
+        // Shows a hit rock losing its cap, then disappearing when a fish breaks through.
+        public void RefreshRocks(BoardState board)
+        {
+            foreach(var cell in new List<Vector2Int>(rocks.Keys))
+            {
+                var parts=rocks[cell];
+                if(board.IsBroken(cell))
+                {
+                    foreach(var part in parts)if(part)Destroy(part);
+                    rocks.Remove(cell);PlayEffect("Bump",Cell(cell));
+                }
+                else if(board.IsCracked(cell)&&shownCracked.Add(cell))
+                {
+                    Destroy(parts[1]);parts[0].transform.localScale*=.82f;PlayEffect("Bump",Cell(cell));
+                }
+            }
+        }
         public void Highlight(int id)
         {
             foreach(var pair in actors) if(pair.Value)pair.Value.Highlight(pair.Key==id);
         }
-        public void Bubbles(Vector3 point,int count=5)
+        public void PlayEffect(string name,Vector3 position)
         {
-            for(int i=0;i<count;i++)
-            {
-                var go=Primitive("Bubble",PrimitiveType.Sphere,point+Random.insideUnitSphere*.20f,Vector3.one*Random.Range(.045f,.12f),bubble,false);
-                go.GetComponent<Renderer>().shadowCastingMode=ShadowCastingMode.Off;
-                go.AddComponent<FishOutBubble>().Initialize(Random.Range(.35f,.8f));
-            }
+            var effect=SpawnEffect(name,transform);if(!effect)return;
+            effect.transform.position=position;
+            float longest=0;
+            foreach(var system in effect.GetComponentsInChildren<ParticleSystem>())longest=Mathf.Max(longest,system.main.duration+system.main.startLifetime.constantMax);
+            Destroy(effect,Mathf.Max(longest,1));
+        }
+        public GameObject AttachEffect(string name,Transform owner)
+        {
+            var effect=SpawnEffect(name,owner);if(effect)effect.transform.localPosition=Vector3.up*.3f;
+            return effect;
+        }
+        private static GameObject SpawnEffect(string name,Transform parent)
+        {
+            var prefab=Resources.Load<GameObject>("Vfx/"+name);
+            return prefab?Instantiate(prefab,parent):null;
         }
         public void Celebrate()
         {
@@ -120,18 +157,6 @@ namespace FishOut
         private void OnDestroy()
         {
             foreach(var material in owned) if(material) { if(Application.isPlaying)Destroy(material);else DestroyImmediate(material); }
-        }
-    }
-    public sealed class FishOutBubble : MonoBehaviour
-    {
-        private float life,total;
-        private Vector3 scale;
-        public void Initialize(float duration) { life=total=duration; scale=transform.localScale; }
-        private void Update()
-        {
-            life-=Time.deltaTime; transform.position+=Vector3.up*Time.deltaTime*.8f;
-            transform.localScale=scale*Mathf.Clamp01(life/total);
-            if(life<=0)Destroy(gameObject);
         }
     }
     public sealed class FishOutCelebrationLight : MonoBehaviour

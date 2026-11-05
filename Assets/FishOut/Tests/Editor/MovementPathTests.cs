@@ -8,7 +8,10 @@ namespace FishOut.Tests
         [Test]
         public void ForwardLineCheckListsOnlyReachableCellsAndDoesNotChangeBoard()
         {
-            var board=new BoardState(FishOutLevels.Get(2));
+            var level=new LevelData();
+            level.fish.Add(new FishData{id=0,cell=new Vector2Int(0,2),facing=Facing.Right});
+            level.fish.Add(new FishData{id=1,cell=new Vector2Int(4,2),facing=Facing.Up});
+            var board=new BoardState(level);
             var path=board.CalculatePath(0);
             CollectionAssert.AreEqual(new[]{new Vector2Int(0,2),new Vector2Int(1,2),new Vector2Int(2,2),new Vector2Int(3,2)},path.Cells);
             Assert.IsFalse(path.Result.exits);Assert.IsFalse(path.Result.hitsCrab);

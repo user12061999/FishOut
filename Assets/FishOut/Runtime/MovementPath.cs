@@ -53,12 +53,8 @@ namespace FishOut
                 {
                     var channel=ConveyorNetwork.RouteToGate(boardPath.Level,boardPath.Result.to);
                     foreach(var point in channel)route.Add(ConveyorNetwork.World(boardPath.Level,point));
-                    route.Add(toWorld(boardPath.Level.gate+Vector2Int.up*4));
-                    route=RoundCorners(route);
-                    var last=route[route.Count-1];
-                    float tail=OffscreenDistance(camera,route[0],Vector3.forward,actorBounds);
-                    route.Add(new Vector3(last.x,last.y,Mathf.Max(last.z,route[0].z+tail)));
-                    return new MovementPath(route);
+                    route.Add(toWorld(boardPath.Level.gate+Vector2Int.up));
+                    return new MovementPath(RoundCorners(route));
                 }
                 var start = route[0];
                 var direction = (route[route.Count - 1] - start).normalized;

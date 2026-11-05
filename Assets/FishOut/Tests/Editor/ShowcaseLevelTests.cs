@@ -6,27 +6,120 @@ namespace FishOut.Tests
 {
     public class ShowcaseLevelTests
     {
-        [TestCase(6)] [TestCase(7)] [TestCase(8)] [TestCase(9)]
-        public void IllustratedSchoolHasFullSolutionAndEveryExitConnectsToGate(int number)
+        // Clears a stage the way a careful player would, returning the crab tolls paid.
+        internal static int ClearStage(BoardState board,System.Action<int> onEscape=null)
+        {
+            bool rescue=board.Level.obstacles.FindAll(o=>o.kind==ObstacleKind.Crab).Count>=3;int tolls=0;
+            for(int guard=0;guard<1000&&!board.IsClear;guard++)
+            {
+                int id=board.FindEscapingFish();
+                if(id>=0){onEscape?.Invoke(id);Assert.IsTrue(board.Move(id).exits);continue;}
+                int rock=-1,crab=-1;
+                foreach(var fish in board.Fish)
+                {
+                    var move=board.Preview(fish.id);
+                    if(move.hitsRock)rock=fish.id;
+                    if(move.hitsCrab)crab=fish.id;
+                }
+                if(rock>=0){board.Move(rock);continue;}
+                Assert.GreaterOrEqual(crab,0,"School is deadlocked at level "+board.Level.number);
+                if(rescue&&!board.RescueUsed){Assert.IsTrue(board.Rescue(crab));continue;}
+                board.Move(crab);tolls++;
+            }
+            Assert.IsTrue(board.IsClear,"Stage did not finish");
+            return tolls;
+        }
+        [TestCase(1,12)] [TestCase(2,18)] [TestCase(3,28)] [TestCase(4,35)] [TestCase(5,60)] [TestCase(6,30)] [TestCase(7,30)] [TestCase(8,30)] [TestCase(9,40)] [TestCase(10,40)]
+        public void SchoolHasFullSolutionAndEveryExitConnectsToGate(int number,int minimumFish)
         {
             var level=FishOutLevels.Get(number);var board=new BoardState(level);
-            Assert.Greater(board.Fish.Count,20);Assert.IsTrue(level.showcase);
+            Assert.GreaterOrEqual(board.Fish.Count,minimumFish);Assert.IsTrue(level.showcase);
             var checkedEntries=new HashSet<Vector2Int>();
-            while(!board.IsClear)
+            int crabs=level.obstacles.FindAll(o=>o.kind==ObstacleKind.Crab).Count;
+            int tolls=ClearStage(board,id=>
             {
-                int id=board.FindEscapingFish();Assert.GreaterOrEqual(id,0,"School is deadlocked");
                 var path=board.CalculatePath(id);Assert.IsTrue(level.IsChannel(path.Result.to));
-                if(checkedEntries.Add(path.Result.to))
-                {
-                    var route=ConveyorNetwork.RouteToGate(level,path.Result.to);
-                    Assert.Less(Vector2.Distance(level.gate,route[route.Count-1]),.001f);
-                    for(int i=1;i<route.Count;i++)Assert.Less(Vector2.Distance(route[i],route[i-1]),.25f,"Conveyor curve has a discontinuity");
-                }
-                board.Move(id);
-            }
-            Assert.AreEqual(3,board.Lives);Assert.IsFalse(board.RescueUsed);
+                if(!checkedEntries.Add(path.Result.to))return;
+                var route=ConveyorNetwork.RouteToGate(level,path.Result.to);
+                Assert.Less(Vector2.Distance(level.gate,route[route.Count-1]),.001f);
+                for(int i=1;i<route.Count;i++)Assert.Less(Vector2.Distance(route[i],route[i-1]),.25f,"Conveyor curve has a discontinuity");
+            });
+            Assert.AreEqual(crabs>=3?crabs-1:crabs,tolls);Assert.GreaterOrEqual(board.Lives,1);Assert.AreEqual(crabs>=3,board.RescueUsed);
         }
-        [TestCase(6)] [TestCase(7)] [TestCase(8)] [TestCase(9)]
+        private static LevelData Lined(params FishData[] fish)
+        {
+            var level=new LevelData{width=3,height=5};level.fish.AddRange(fish);return level;
+        }
+        private static FishData Fish(int id,int x,int y,Facing facing)=>new FishData{id=id,cell=new Vector2Int(x,y),facing=facing};
+        [Test]
+        public void TouchingFishWithTheSameFacingEscapeFrontFirst()
+        {
+            var board=new BoardState(Lined(Fish(1,1,4,Facing.Up),Fish(2,1,3,Facing.Up),Fish(3,1,2,Facing.Up),Fish(4,1,1,Facing.Left),Fish(5,1,0,Facing.Up)));
+            CollectionAssert.AreEqual(new[]{1,2,3},board.EscapingLine(3),"A different facing ends the line");
+            CollectionAssert.AreEqual(new[]{1,2,3},board.EscapingLine(2),"Tapping mid-line moves the same line");
+            foreach(var id in board.EscapingLine(1))Assert.IsTrue(board.Move(id).exits);
+            Assert.AreEqual(2,board.Fish.Count);
+        }
+        [Test]
+        public void LineWaitsWhenItsFrontFishCannotEscapeOrThereIsAGap()
+        {
+            var blocked=new BoardState(Lined(Fish(1,1,4,Facing.Left),Fish(9,0,4,Facing.Right),Fish(2,1,3,Facing.Up),Fish(3,1,2,Facing.Up)));
+            CollectionAssert.IsEmpty(blocked.EscapingLine(3));
+            var gap=new BoardState(Lined(Fish(1,1,4,Facing.Up),Fish(2,1,2,Facing.Up)));
+            CollectionAssert.IsEmpty(gap.EscapingLine(2),"A gap breaks the line, so the rear fish stays behind");
+            CollectionAssert.AreEqual(new[]{1},gap.EscapingLine(1));
+        }
+        private static int Waves(int number)
+        {
+            var board=new BoardState(FishOutLevels.Get(number));int waves=0;
+            for(int guard=0;guard<500;guard++)
+            {
+                var free=new List<int>();
+                foreach(var fish in board.Fish)if(board.Preview(fish.id).exits)free.Add(fish.id);
+                if(free.Count==0)return waves;
+                waves++;
+                foreach(var id in free)if(board.Find(id)!=null&&board.Preview(id).exits)board.Move(id);
+            }
+            return waves;
+        }
+        [Test]
+        public void DifficultyRisesFromStageToStage()
+        {
+            Assert.Greater(Waves(5),Waves(1),"Later stages must ask for more waves");
+            Assert.Greater(Waves(10),Waves(5),"Later stages must ask for more waves");
+        }
+        [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase(5)] [TestCase(6)] [TestCase(7)] [TestCase(8)] [TestCase(9)] [TestCase(10)]
+        public void EveryStageUsesAtMostTwoCharacterModels(int number)
+        {
+            var models=new HashSet<int>();
+            foreach(var fish in FishOutLevels.Get(number).fish)models.Add(fish.appearance);
+            Assert.LessOrEqual(models.Count,2);
+        }
+        [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase(5)] [TestCase(6)] [TestCase(7)] [TestCase(8)] [TestCase(9)] [TestCase(10)]
+        public void RingEntryNextToTheGateTakesTheShortWay(int number)
+        {
+            var level=FishOutLevels.Get(number);
+            var entry=new Vector2(level.gate.x-1,level.height-.4f);
+            float length=0;var route=ConveyorNetwork.RouteToGate(level,entry);
+            for(int i=1;i<route.Count;i++)length+=Vector2.Distance(route[i-1],route[i]);
+            Assert.Less(length,5f,"A fish beside the gate must not circle the whole ring");
+        }
+        [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase(5)] [TestCase(6)] [TestCase(7)] [TestCase(8)] [TestCase(9)] [TestCase(10)]
+        public void EachObstacleHoldsUpExactlyOneFish(int number)
+        {
+            var level=FishOutLevels.Get(number);int blocked=0,expected=level.obstacles.Count;
+            foreach(var fish in level.fish)
+            {
+                var step=BoardState.Direction(fish.facing);var p=fish.cell+step;
+                while(!level.IsChannel(p)&&p.x>=0&&p.y>=0&&p.x<level.width&&p.y<level.height)
+                {
+                    if(level.obstacles.Exists(o=>o.cell==p)){blocked++;Assert.Less(fish.id,expected);break;}
+                    p+=step;
+                }
+            }
+            Assert.AreEqual(expected,blocked);
+        }
+        [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase(5)] [TestCase(6)] [TestCase(7)] [TestCase(8)] [TestCase(9)] [TestCase(10)]
         public void EntireFishCellFitsInsideCurvedWater(int number)
         {
             var level=FishOutLevels.Get(number);var positions=new HashSet<Vector2Int>();
@@ -40,14 +133,7 @@ namespace FishOut.Tests
                 }
             }
         }
-        [Test]
-        public void TwoToneSchoolContainsExactlyRedAndBlue()
-        {
-            var l=FishOutLevels.Get(9);var palette=new HashSet<int>();
-            foreach(var fish in l.fish)palette.Add(fish.appearance);
-            CollectionAssert.AreEquivalent(new[]{0,3},palette);
-        }
-        [TestCase(6)] [TestCase(7)] [TestCase(8)] [TestCase(9)]
+        [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase(5)] [TestCase(6)] [TestCase(7)] [TestCase(8)] [TestCase(9)] [TestCase(10)]
         public void RenderedWaterMeshSupportsEveryCellCornerAndEdge(int number)
         {
             var level=FishOutLevels.Get(number);var mesh=CurvedWaterMesh.Build(level,0,-.015f);
