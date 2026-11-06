@@ -168,6 +168,10 @@ namespace FishOut
                 if(id==stopLessonFish||Board.Find(stopLessonFish)==null)lessonActive=false;
                 else tutorialTarget=stopLessonFish;
             }
+            // Words only while a lesson is running: level 1 until its guided taps are done, level 2 until the lesson
+            // fish has stopped and the player has moved on, later stages until their first move.
+            if(CurrentLevel==1&&guidedTaps>=3)hud.instructions.text="";
+            if(CurrentLevel==2&&!lessonActive&&id!=stopLessonFish)hud.instructions.text="";
             if(CurrentLevel>=3&&result.ChangesBoard)hud.instructions.text="";
             world.Highlight(tutorialTarget>=0?tutorialTarget:Board.Find(hintTarget)!=null?hintTarget:-1);
             pointer.gameObject.SetActive(tutorialTarget>=0);

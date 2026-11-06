@@ -12,6 +12,7 @@ namespace FishOut
         public Text level, remaining, notice, instructions;
         private Text hintBadge, rescueBadge, rescueCaption;
         private Image[] hearts;
+        private HudSkin skin;
         private Image instructionPlate,fade;
         private float fadeLeft;
         private const float FadeLength=.25f;
@@ -32,7 +33,7 @@ namespace FishOut
 
         public void Build(FishOutGame owner, Font uiFont)
         {
-            game = owner; font = uiFont;
+            game = owner; font = uiFont; skin = HudSkin.Load();
             var canvas = gameObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 20;
@@ -48,22 +49,24 @@ namespace FishOut
             Button(home.transform,"PLAY",new Vector2(.5f,.18f),new Vector2(660,125),Teal,()=>game.StartLevel(game.CurrentLevel));
             Button(home.transform,"LEVELS",new Vector2(.5f,.095f),new Vector2(660,100),new Color(.10f,.36f,.43f),()=>game.OpenLevelSelect(),36);
             gameplay = Rect("Gameplay",safe,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero).gameObject;
-            IconButton(gameplay.transform,"Settings",FishOutIcons.Gear,new Vector2(.09f,.955f),()=>game.OpenSettings());
-            IconButton(gameplay.transform,"Retry",FishOutIcons.Retry,new Vector2(.91f,.955f),()=>game.ConfirmRetry());
-            Plate(gameplay.transform,"Level plate",new Vector2(.5f,.955f),new Vector2(420,92),Pill);
-            level = Label(gameplay.transform,"LEVEL 1",new Vector2(.5f,.955f),new Vector2(400,80),46,Color.white);
-            Plate(gameplay.transform,"Status plate",new Vector2(.5f,.9f),new Vector2(420,70),Pill);
+            // The status sits top-left so the painted cave (top centre-right), where fish escape, stays in view.
+            IconButton(gameplay.transform,"Settings",skin?skin.settingsIcon:FishOutIcons.Gear,new Vector2(.085f,.955f),()=>game.OpenSettings());
+            IconButton(gameplay.transform,"Retry",skin?skin.retryIcon:FishOutIcons.Retry,new Vector2(.915f,.955f),()=>game.ConfirmRetry());
+            SkinPlate(gameplay.transform,"Level plate",new Vector2(.315f,.955f),new Vector2(320,96));
+            level = Label(gameplay.transform,"LEVEL 1",new Vector2(.315f,.958f),new Vector2(300,80),44,Color.white);
+            SkinPlate(gameplay.transform,"Status plate",new Vector2(.315f,.898f),new Vector2(320,72));
             hearts=new Image[3];
             for(int i=0;i<3;i++)
             {
-                hearts[i]=Plate(gameplay.transform,"Life "+(i+1),new Vector2(.345f+i*.052f,.9f),new Vector2(50,50),new Color(1f,.3f,.38f));
-                hearts[i].sprite=FishOutIcons.Heart;hearts[i].type=Image.Type.Simple;
+                hearts[i]=Plate(gameplay.transform,"Life "+(i+1),new Vector2(.205f+i*.052f,.899f),new Vector2(54,54),skin?Color.white:new Color(1f,.3f,.38f));
+                hearts[i].sprite=skin?skin.heart:FishOutIcons.Heart;hearts[i].type=Image.Type.Simple;
             }
-            remaining = Label(gameplay.transform,"3 FISH",new Vector2(.6f,.9f),new Vector2(220,60),32,Color.white);
-            instructionPlate = Plate(gameplay.transform,"Instruction plate",new Vector2(.5f,.178f),new Vector2(980,66),Pill);
-            instructions = Label(gameplay.transform,"",new Vector2(.5f,.178f),new Vector2(970,90),31,Color.white);
-            hint = Pad(gameplay.transform,"HINT",FishOutIcons.Bulb,new Color(1f,.86f,.3f),new Vector2(.36f,.082f),()=>game.UseHint(),out hintBadge,out _);
-            rescue = Pad(gameplay.transform,"RESCUE",FishOutIcons.Buoy,new Color(1f,.36f,.36f),new Vector2(.64f,.082f),()=>game.BeginRescue(),out rescueBadge,out rescueCaption);
+            if(skin)Icon(gameplay.transform,"Fish icon",skin.fishIcon,Color.white,new Vector2(.375f,.899f),48);
+            remaining = Label(gameplay.transform,"3",new Vector2(.43f,.898f),new Vector2(64,60),36,Color.white);
+            instructionPlate = skin?SkinPlate(gameplay.transform,"Instruction plate",new Vector2(.5f,.178f),new Vector2(900,84),skin.bubble):Plate(gameplay.transform,"Instruction plate",new Vector2(.5f,.178f),new Vector2(980,66),Pill);
+            instructions = Label(gameplay.transform,"",new Vector2(.5f,.178f),new Vector2(860,90),31,skin?Ink:Color.white);
+            hint = Pad(gameplay.transform,"HINT",skin?skin.hintIcon:FishOutIcons.Bulb,skin?Color.white:new Color(1f,.86f,.3f),new Vector2(.36f,.082f),()=>game.UseHint(),out hintBadge,out _,skin?skin.hintButton:null);
+            rescue = Pad(gameplay.transform,"RESCUE",skin?skin.rescueIcon:FishOutIcons.Buoy,skin?Color.white:new Color(1f,.36f,.36f),new Vector2(.64f,.082f),()=>game.BeginRescue(),out rescueBadge,out rescueCaption,skin?skin.rescueButton:null);
             notice = Label(safe,"",new Vector2(.5f,.235f),new Vector2(980,100),29,Color.white);
             flash = Rect("Hazard flash",transform,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero).gameObject.AddComponent<Image>();
             flash.color = Color.clear; flash.raycastTarget = false;
@@ -95,11 +98,11 @@ namespace FishOut
             var label=Label(rt,text,new Vector2(.5f,.5f),size-new Vector2(16,8),fontSize,color==new Color(.97f,.76f,.32f)?Ink:Color.white);
             return b;
         }
-        private Button Clickable(RectTransform rt,Color color,UnityAction action)
+        private Button Clickable(RectTransform rt,Color color,UnityAction action,Sprite sprite=null)
         {
-            var im=rt.gameObject.AddComponent<Image>(); im.sprite=RoundSprite(); im.type=Image.Type.Sliced; im.color=color;
-            // A hard lower shadow gives the chunky raised look of the benchmark buttons.
-            var depth=rt.gameObject.AddComponent<Shadow>(); depth.effectColor=new Color(.02f,.16f,.22f,.6f); depth.effectDistance=new Vector2(0,-9);
+            var im=rt.gameObject.AddComponent<Image>(); im.sprite=sprite?sprite:RoundSprite(); im.type=Image.Type.Sliced; im.color=sprite?Color.white:color;
+            // A hard lower shadow gives the chunky raised look of the benchmark buttons (the pack's sprites draw their own).
+            if(!sprite){var depth=rt.gameObject.AddComponent<Shadow>(); depth.effectColor=new Color(.02f,.16f,.22f,.6f); depth.effectDistance=new Vector2(0,-9);}
             var b=rt.gameObject.AddComponent<Button>(); b.targetGraphic=im;
             var colors=b.colors; colors.highlightedColor=new Color(.9f,1f,1f); colors.pressedColor=new Color(.68f,.84f,.87f); colors.disabledColor=new Color(.55f,.62f,.65f,.8f); b.colors=colors;
             b.onClick.AddListener(()=>{game.ConsumeUiInput();action();});
@@ -120,18 +123,31 @@ namespace FishOut
         private void IconButton(Transform parent,string name,Sprite sprite,Vector2 anchor,UnityAction action)
         {
             var rt=Rect(name,parent,anchor,anchor,Vector2.zero,new Vector2(116,116));
-            Clickable(rt,IconPlate,action);
-            Icon(rt,"Icon",sprite,Color.white,new Vector2(.5f,.5f),78);
+            Clickable(rt,IconPlate,action,skin?skin.topButton:null);
+            var icon=Icon(rt,"Icon",sprite,Color.white,new Vector2(.5f,skin?.54f:.5f),skin?70:78);
+            if(skin)Depth(icon);
         }
-        private Button Pad(Transform parent,string caption,Sprite sprite,Color tint,Vector2 anchor,UnityAction action,out Text badge,out Text label)
+        private Button Pad(Transform parent,string caption,Sprite sprite,Color tint,Vector2 anchor,UnityAction action,out Text badge,out Text label,Sprite plate=null)
         {
             var rt=Rect(caption,parent,anchor,anchor,Vector2.zero,new Vector2(210,200));
-            var button=Clickable(rt,PadPlate,action);
-            Icon(rt,"Icon",sprite,tint,new Vector2(.5f,.6f),116);
-            label=Label(rt,caption,new Vector2(.5f,.15f),new Vector2(200,50),28,Color.white);
-            Plate(rt,"Badge",new Vector2(.93f,.9f),new Vector2(66,66),IconPlate);
-            badge=Label(rt,"1",new Vector2(.93f,.9f),new Vector2(60,60),34,Color.white);
+            var button=Clickable(rt,PadPlate,action,plate);
+            var icon=Icon(rt,"Icon",sprite,tint,new Vector2(.5f,.6f),plate?100:116);
+            if(plate)Depth(icon);
+            label=Label(rt,caption,new Vector2(.5f,.17f),new Vector2(200,50),28,Color.white);
+            if(skin&&skin.badge)Icon(rt,"Badge",skin.badge,Color.white,new Vector2(.93f,.9f),74);
+            else Plate(rt,"Badge",new Vector2(.93f,.9f),new Vector2(66,66),IconPlate);
+            badge=Label(rt,"1",new Vector2(.93f,.91f),new Vector2(60,60),34,Color.white);
             return button;
+        }
+        // A dark drop under white pictograms, the way the pack draws its icons on buttons.
+        private static void Depth(Image icon){var drop=icon.gameObject.AddComponent<Shadow>();drop.effectColor=new Color(0,0,0,.35f);drop.effectDistance=new Vector2(0,-5);}
+        // A pack plate when the skin is present, else the drawn translucent pill.
+        private Image SkinPlate(Transform parent,string name,Vector2 anchor,Vector2 size,Sprite sprite=null)
+        {
+            var image=Plate(parent,name,anchor,size,Pill);
+            var chosen=sprite?sprite:skin?skin.plate:null;
+            if(chosen){image.sprite=chosen;image.type=Image.Type.Sliced;image.color=Color.white;}
+            return image;
         }
         private static Sprite RoundSprite()
         {
@@ -147,9 +163,9 @@ namespace FishOut
         }
         public void Refresh(BoardState board, int number, bool selecting)
         {
-            level.text="LEVEL "+number; remaining.text=board.Fish.Count+" FISH";
+            level.text="LEVEL "+number; remaining.text=skin?board.Fish.Count.ToString():board.Fish.Count+" FISH";
             // Spec §6: the top bar always shows the 3 lives, even on stages without crabs.
-            for(int i=0;i<hearts.Length;i++) { hearts[i].gameObject.SetActive(true); hearts[i].color=i<board.Lives?new Color(1f,.3f,.38f):Spent; }
+            for(int i=0;i<hearts.Length;i++) { hearts[i].gameObject.SetActive(true); if(skin){hearts[i].sprite=i<board.Lives?skin.heart:skin.heartSpent;hearts[i].color=Color.white;}else hearts[i].color=i<board.Lives?new Color(1f,.3f,.38f):Spent; }
             hint.interactable=!board.HintUsed&&!selecting&&!game.IsLocked;
             rescue.interactable=selecting||(!board.RescueUsed&&!game.IsLocked);
             hintBadge.text=board.HintUsed?"0":"1";
