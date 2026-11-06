@@ -23,6 +23,7 @@ namespace FishOut
             var quad=GameObject.CreatePrimitive(PrimitiveType.Quad);ShadowQuad=quad.GetComponent<MeshFilter>().sharedMesh;quad.SetActive(false);Destroy(quad);
             Func<Vector2,float> shore=p=>ReefWaterDomain.ShoreDistance(level,p);
             var min=new Vector2(-9,-10);var max=new Vector2(level.width+8,level.height+10);
+            if(PaintedBackdrop.Available){BuildOnPainting(level,cell,min,max);return;}
             flowing.Add(Ground("Deep sea",Sea(min*6,max*6,-.34f),new Color(.24f,.84f,.96f),strongCaustics));
             flowing.Add(Ground("Reef water",CurvedWaterMesh.Build(level,p=>shore(p)+3.4f,-.3f,min,max,.3f,1.5f),new Color(.36f,.95f,.98f),strongCaustics));
             flowing.Add(Ground("Shallow water",CurvedWaterMesh.Build(level,p=>shore(p)+1.15f,-.26f,min,max,.25f,1.5f),new Color(.58f,1f,.95f),strongCaustics));
@@ -37,6 +38,25 @@ namespace FishOut
             decor.SetView(level,Mathf.Max((float)Screen.width/Mathf.Max(1,Screen.height),.65f));
             decor.Scatter(level);
             MergeDecor(decor);
+        }
+        // The client's painting supplies the sea, shore, road and cave; only the board itself and the
+        // inner water roads that some stages cut through it are still drawn on top.
+        private void BuildOnPainting(LevelData level,Func<Vector2Int,Vector3> cell,Vector2 min,Vector2 max)
+        {
+            PaintedBackdrop.Build(transform,level,Resources.Load<Material>("Reef/SeaUnlit"),meshes,materials,textures);
+            if(level.channelLines.Count>2)
+                Ground("Inner sand roads",CurvedWaterMesh.Build(level,p=>InnerRoad(level,p),-.02f,min,max,.16f,float.PositiveInfinity),new Color(.96f,.78f,.48f),softCaustics);
+            var gate=new GameObject("Sea gate - shared exit");gate.transform.SetParent(transform,false);gate.transform.position=cell(level.gate);
+        }
+        private static float InnerRoad(LevelData level,Vector2 p)
+        {
+            float nearest=float.MaxValue;
+            for(int line=2;line<level.channelLines.Count;line++)
+            {
+                var path=level.channelLines[line];
+                for(int i=1;i<path.Length;i++)nearest=Mathf.Min(nearest,ShowcaseLevels.Distance(p,path[i-1],path[i]));
+            }
+            return ReefWaterDomain.ChannelHalfWidth+.12f-nearest;
         }
         // All props share one mesh and one material; each colour is a texel in a small palette.
         private void MergeDecor(ReefDecor decor)

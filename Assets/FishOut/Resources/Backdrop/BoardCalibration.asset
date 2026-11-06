@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd19bdf8cc6bf9e469475351666b7114, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishOut.Runtime::FishOut.BoardCalibration
+  topLeft: {x: 274.8, y: 346.3}
+  topRight: {x: 917.2, y: 445.3}
+  bottomRight: {x: 834.2, y: 1443.8}
+  bottomLeft: {x: -17.8, y: 1268}
+  radiusTopLeft: 1.725
+  radiusTopRight: 1.175
+  radiusBottomRight: 1.175
+  radiusBottomLeft: 1.5
+  edgeOffset: 0
+  roadSide: 0.43
+  roadBottom: 0.41
+  roadTop: 0.32
+  caveNeck:
+  - {x: 625.8, y: 284.2}
+  - {x: 635.2, y: 200.6}
+  - {x: 639.9, y: 142.1}
+  customRoad: 0
+  roadPoints:
+  - {x: 609.3338, y: 368.46442}
+  - {x: 239.25546, y: 312.00012}
+  - {x: -97.7524, y: 1319.8304}
+  - {x: 894.0077, y: 1528.145}
+  - {x: 967.2128, y: 423.0674}
+  roadRounding: 1.1

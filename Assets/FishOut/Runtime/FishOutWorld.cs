@@ -13,7 +13,7 @@ namespace FishOut
         private readonly Dictionary<Vector2Int,List<GameObject>> rocks=new Dictionary<Vector2Int,List<GameObject>>();
         private readonly HashSet<Vector2Int> shownCracked=new HashSet<Vector2Int>();
         public readonly Dictionary<int,FishActor> actors = new Dictionary<int,FishActor>();
-        public Vector3 Cell(Vector2Int p) => new Vector3(p.x-(level==null?5:level.width-1)*.5f,.10f,p.y-(level==null?7:level.height-1)*.5f);
+        public Vector3 Cell(Vector2Int p) => level==null?new Vector3(p.x-5*.5f,.10f,p.y-7*.5f):ConveyorNetwork.World(level,p,.10f);
         public void Build(FishOutGame game, BoardState board)
         {
             level=board.Level;
@@ -49,11 +49,13 @@ namespace FishOut
                     rocks[o.cell]=new List<GameObject>{rock,cap};
                 }
             }
+            // Obstacles further up the painted board are drawn a little smaller.
+            if(PaintedBackdrop.Warps(level))foreach(Transform piece in pieces)piece.localScale*=PaintedBackdrop.ScaleAt(piece.position);
             var batcher=gameObject.AddComponent<FishBatcher>();
             foreach(var data in board.Fish)
             {
                 var root=new GameObject("Fish "+data.id); root.transform.SetParent(pieces,false); root.transform.position=Cell(data.cell);
-                root.transform.rotation=Quaternion.Euler(0,(int)data.facing*90f,0);
+                root.transform.rotation=Quaternion.Euler(0,PaintedBackdrop.Warps(level)?PaintedBackdrop.Yaw(level,data.cell,BoardState.Direction(data.facing)):(int)data.facing*90f,0);
                 var prefab=game.fishPrefabs[data.appearance%game.fishPrefabs.Length];
                 if(!prefab)prefab=game.fishPrefabs[0];
                 var model=Model(prefab,root.transform,level.showcase?.95f:.83f,game.characterAnimations,(data.appearance%game.fishPrefabs.Length)/3);

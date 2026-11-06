@@ -38,6 +38,8 @@ namespace FishOut
         private void Update()
         {
             if(Visual) Visual.localPosition=resting+Vector3.up*(Mathf.Sin(Time.time*2.8f+Id)*.025f);
+            // Smaller further up the painted board, growing as it swims towards the camera.
+            if(PaintedBackdrop.Current!=null) transform.localScale=Vector3.one*PaintedBackdrop.ScaleAt(transform.position);
             if(halo&&halo.enabled) halo.widthMultiplier=.09f+Mathf.Sin(Time.unscaledTime*6f)*.02f;
             if(popLeft>0&&Visual)
             {

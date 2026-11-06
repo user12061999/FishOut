@@ -73,6 +73,7 @@ namespace FishOut
             foreach(var point in path){length+=Vector2.Distance(previous,point);previous=point;}
             return length;
         }
-        public static Vector3 World(LevelData level,Vector2 p,float y=.1f)=>new Vector3(p.x-(level.width-1)*.5f,y,p.y-(level.height-1)*.5f);
+        // On the painted board the grid follows the painting's perspective (see PaintedBackdrop).
+        public static Vector3 World(LevelData level,Vector2 p,float y=.1f)=>PaintedBackdrop.Warps(level)?PaintedBackdrop.GridToWorld(level,p,y):new Vector3(p.x-(level.width-1)*.5f,y,p.y-(level.height-1)*.5f);
     }
 }

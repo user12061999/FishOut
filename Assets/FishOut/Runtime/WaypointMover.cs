@@ -17,6 +17,8 @@ namespace FishOut
         public float HoldSpeed { get; set; }
         public float Speed { get; private set; }
         public bool OnRoad => IsMoving && travelled>=roadStart;
+        // Path distance left before this fish joins the shared road (negative once on it).
+        public float ToRoad => roadStart-travelled;
         public float Remaining { get; private set; }
         private const float QueueBrake = 3;
         private float travelled;

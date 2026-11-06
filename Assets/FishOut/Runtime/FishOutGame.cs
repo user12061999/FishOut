@@ -80,12 +80,12 @@ namespace FishOut
                 events.AddComponent<StandaloneInputModule>();
 #endif
             }
-            // A brand new player goes straight into the first level.
-            if(PlayerPrefs.HasKey(SavePrefix+"Level"))ShowHome();else StartLevel(1);
+            // Spec §6: the game opens on Home; on the first play PLAY starts Level 1.
+            ShowHome();
         }
         private void RebuildBoard()
         {
-            StopAllCoroutines(); locked=false;moving.Clear();swimmers.Clear();selectingRescue=false;settings=false;tutorialTarget=-1;hintTarget=-1;guidedTaps=0;lessonActive=false;lineExplained=false;pointer.gameObject.SetActive(false);
+            StopAllCoroutines(); locked=false;moving.Clear();swimmers.Clear();linePredecessor.Clear();selectingRescue=false;settings=false;tutorialTarget=-1;hintTarget=-1;guidedTaps=0;lessonActive=false;lineExplained=false;pointer.gameObject.SetActive(false);
             if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
             Board=new BoardState(FishOutLevels.Get(CurrentLevel));
             var root=new GameObject("Underwater board");root.transform.SetParent(transform,false);
@@ -112,6 +112,11 @@ namespace FishOut
         private void FrameShowcase()
         {
             float aspect=(float)Screen.width/Mathf.Max(1,Screen.height);
+            if(PaintedBackdrop.Available)
+            {
+                PaintedBackdrop.Frame(boardCamera,Board.Level,aspect);
+                boardCamera.clearFlags=CameraClearFlags.SolidColor;boardCamera.backgroundColor=new Color(.31f,.8f,.88f);return;
+            }
             BoardView.Compute(Board.Level,aspect,out var size,out var middle);
             var rotation=BoardView.Rotation;
             boardCamera.rect=new Rect(0,0,1,1);boardCamera.orthographicSize=size;
@@ -132,9 +137,9 @@ namespace FishOut
             {
                 case 1: hud.instructions.text="Tap a fish to send it to the cave.";tutorialTarget=NearestEscaping();break;
                 case 2: hud.instructions.text="Tap the highlighted fish. It stops before another fish.";tutorialTarget=stopLessonFish=FindStoppingFish();lessonActive=true;break;
-                case 3: hud.instructions.text="A hit cracks a rock. The next hit breaks through.";break;
-                case 4: hud.instructions.text="Watch out! A crab takes a life to let a fish pass.";break;
-                case 8: case 10: hud.instructions.text="Three crabs! Use Rescue or you will run out of lives.";break;
+                case 3: hud.instructions.text="Rocks never move. Plan the order around them.";break;
+                case 4: hud.instructions.text="Watch out! Every bump into a crab costs a life.";break;
+                case 5: hud.instructions.text="Rocks and crabs together. Think before you tap!";break;
                 default:hud.instructions.text="Clear a path and lead every fish to the cave.";break;
             }
             world.Highlight(tutorialTarget);pointer.gameObject.SetActive(tutorialTarget>=0);lastTapTime=Time.unscaledTime;Refresh();
@@ -172,15 +177,25 @@ namespace FishOut
             foreach(var fish in Board.Fish){var move=Board.Preview(fish.id);if(move.ChangesBoard&&!move.exits)return fish.id;}
             return Board.FindEscapingFish();
         }
+        // Spec §4: taps are ignored while a fish is moving on the board. Once it has reached the road to the cave,
+        // it no longer blocks anything on the board, so the next tap is accepted.
+        public bool FishMovingOnBoard
+        {
+            get
+            {
+                foreach(var id in moving){if(world.actors.TryGetValue(id,out var actor)&&actor&&actor.Mover.OnRoad)continue;return true;}
+                return false;
+            }
+        }
         public void TapFish(int id)
         {
-            if(!playing||locked||settings||hud.modal||Board.IsFailed||Board.IsClear||Board.Find(id)==null||moving.Contains(id))return;
+            if(!playing||locked||settings||hud.modal||Board.IsFailed||Board.IsClear||Board.Find(id)==null||moving.Contains(id)||FishMovingOnBoard)return;
             if(selectingRescue){StartCoroutine(RescueFish(id));return;}
             var move=Board.Preview(id);
             if(CurrentLevel==4&&move.hitsCrab&&!crabWarned)
             {
                 world.Highlight(id);
-                hud.Choice("WATCH OUT!","A crab takes 1 of your 3 lives, then lets that fish pass.\nRescue can save the fish without losing a life.\nThis tap has not moved the fish.","GOT IT",()=>{crabWarned=true;world.Highlight(-1);hud.CloseModal();ResolveBoard();});
+                hud.Choice("WATCH OUT!","Bumping into a crab costs 1 of your 3 lives, every time.\nThe crab never moves. Use Rescue to take that fish away safely.\nThis tap has not moved the fish.","GOT IT",()=>{crabWarned=true;world.Highlight(-1);hud.CloseModal();ResolveBoard();});
                 return;
             }
             if(vibration)FishOutHaptics.Tap();
@@ -190,11 +205,13 @@ namespace FishOut
             if(line.Count==0){StartCoroutine(MoveFish(id));return;}
             if(CurrentLevel==1&&line.Count>=2&&!lineExplained){lineExplained=true;hud.Toast("Fish facing the same way leave together!",2);}
             // Each fish leaves the board state as it starts, which clears the way for the next one.
-            bool leader=true;
+            bool leader=true;WaypointMover previous=null;
             foreach(var member in line)
             {
                 if(moving.Contains(member))break;
-                StartCoroutine(MoveFish(member,leader));leader=false;
+                var mover=world.actors[member].Mover;
+                if(previous!=null)linePredecessor[mover]=previous;
+                StartCoroutine(MoveFish(member,leader));leader=false;previous=mover;
             }
         }
         // A blocked tap changes nothing, so it keeps any guide on screen and points at the cause.
@@ -247,7 +264,7 @@ namespace FishOut
                 actor.transform.localScale=Vector3.one*Mathf.Clamp01(1-(position.z-gate.z));
             });
             if(trail)Destroy(trail);
-            swimmers.Remove(actor.Mover);
+            swimmers.Remove(actor.Mover);linePredecessor.Remove(actor.Mover);
             if(result.exits){world.actors.Remove(id);Destroy(actor.gameObject);}
             else
             {
@@ -296,10 +313,12 @@ namespace FishOut
             {
                 UnlockedLevel=Mathf.Max(UnlockedLevel,CurrentLevel+1);
                 PlayerPrefs.SetInt(SavePrefix+"Unlocked",UnlockedLevel);PlayerPrefs.SetInt(SavePrefix+"Level",CurrentLevel+1);PlayerPrefs.Save();
-                hud.Result("CLEAR","All fish are free!",FishOutIcons.Star,Board.Lives,"NEXT",()=>StartLevel(CurrentLevel+1));
+                hud.StageClear(Board.Lives,ClearCoins(),"All fish are free!","NEXT",()=>StartLevel(CurrentLevel+1));
             }
-            else hud.Result("CLEAR","All fish are free!\nAll stages completed.",FishOutIcons.Star,Board.Lives,"HOME",()=>ShowHome());
+            else hud.StageClear(Board.Lives,ClearCoins(),"All stages completed!","HOME",()=>ShowHome());
         }
+        // Placeholder reward (spec §6): a base amount plus a bonus for every life kept. Coins are not stored yet.
+        private int ClearCoins()=>50+Board.Lives*50;
         private void ShowDeadlock()
         {
             pointer.gameObject.SetActive(false);
@@ -364,7 +383,7 @@ namespace FishOut
             foreach(var fish in swimmers)
             {
                 fish.Held=false;fish.HoldSpeed=float.MaxValue;
-                if(!fish.OnRoad)continue;
+                if(!fish.OnRoad){HoldBeforeJoining(fish);continue;}
                 foreach(var other in swimmers)
                 {
                     if(other==fish||!other.OnRoad)continue;
@@ -376,15 +395,37 @@ namespace FishOut
                 }
             }
         }
-        // Looks along this fish's own path, which also catches a fish merging in from the side.
-        private static bool Touching(WaypointMover fish,WaypointMover ahead)
+        // A fish already on the road has the right of way: one about to join waits at the edge
+        // while a road fish behind or level with it passes the join point.
+        private const float JoinLead=1.2f,JoinRadius=1.1f;
+        // Follower → the fish directly in front of it in the line it left with.
+        private readonly Dictionary<WaypointMover,WaypointMover> linePredecessor=new Dictionary<WaypointMover,WaypointMover>();
+        private void HoldBeforeJoining(WaypointMover fish)
         {
-            return Vector3.Distance(fish.PointAhead(QueueNear),ahead.transform.position)<QueueRadius;
+            if(!fish.IsMoving||float.IsInfinity(fish.roadStart))return;
+            float cell=PaintedBackdrop.CellWorldSize(fish.transform.position);
+            if(fish.ToRoad>JoinLead*cell)return;
+            var join=fish.PointAhead(Mathf.Max(0,fish.ToRoad));
+            foreach(var other in swimmers)
+            {
+                if(other==fish||!other.OnRoad||other.Remaining<=fish.Remaining-QueueGap*cell)continue;
+                if(Vector3.Distance(other.transform.position,join)<JoinRadius*cell){fish.Held=true;fish.HoldSpeed=0;return;}
+            }
+        }
+        // Looks along this fish's own path, which also catches a fish merging in from the side.
+        // Distances are in cells: on the painted board a cell shrinks with perspective.
+        private bool Touching(WaypointMover fish,WaypointMover ahead)
+        {
+            // The fish in front in the same line keeps its exact one-cell spacing, so it is not a crash even round a tight corner.
+            if(linePredecessor.TryGetValue(fish,out var front)&&front==ahead)return false;
+            float cell=PaintedBackdrop.CellWorldSize(fish.transform.position);
+            return Vector3.Distance(fish.PointAhead(QueueNear*cell),ahead.transform.position)<QueueRadius*cell;
         }
         // A line keeps its exact one-cell spacing, so only a closer fish counts this far ahead.
         private static bool Following(WaypointMover fish,WaypointMover ahead)
         {
-            return fish.Remaining-ahead.Remaining<QueueGap&&Vector3.Distance(fish.PointAhead(QueueFar),ahead.transform.position)<QueueFarRadius;
+            float cell=PaintedBackdrop.CellWorldSize(fish.transform.position);
+            return fish.Remaining-ahead.Remaining<QueueGap*cell&&Vector3.Distance(fish.PointAhead(QueueFar*cell),ahead.transform.position)<QueueFarRadius*cell;
         }
         // Every finger counts, since several fish may swim at once and two thumbs are natural.
         private void GatherPresses()

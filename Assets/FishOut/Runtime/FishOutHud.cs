@@ -148,9 +148,8 @@ namespace FishOut
         public void Refresh(BoardState board, int number, bool selecting)
         {
             level.text="LEVEL "+number; remaining.text=board.Fish.Count+" FISH";
-            // Only stages with crabs can cost a life.
-            bool danger=board.Level.obstacles.Exists(o=>o.kind==ObstacleKind.Crab);
-            for(int i=0;i<hearts.Length;i++) { hearts[i].gameObject.SetActive(danger); hearts[i].color=i<board.Lives?new Color(1f,.3f,.38f):Spent; }
+            // Spec §6: the top bar always shows the 3 lives, even on stages without crabs.
+            for(int i=0;i<hearts.Length;i++) { hearts[i].gameObject.SetActive(true); hearts[i].color=i<board.Lives?new Color(1f,.3f,.38f):Spent; }
             hint.interactable=!board.HintUsed&&!selecting&&!game.IsLocked;
             rescue.interactable=selecting||(!board.RescueUsed&&!game.IsLocked);
             hintBadge.text=board.HintUsed?"0":"1";
@@ -201,15 +200,89 @@ namespace FishOut
             for(int i=0;i<3;i++)icons[i]=Icon(panel,"Result icon "+(i+1),icon,i<earned?filled:new Color(.74f,.8f,.82f),new Vector2(.5f+(i-1)*.2f,.72f),i==1?170:140);
             StartCoroutine(Reveal(panel,icons));
         }
+        // Spec §6 clear screen, built from the project's GUI Pro-SuperCasual "Stage Clear" popup:
+        // CLEAR, stars for the lives kept, coins earned (placeholder) and one button.
+        public const string StageClearResource="UI/StageClear";
+        public void StageClear(int earnedStars,int coins,string message,string first,UnityAction yes)
+        {
+            var prefab=Resources.Load<GameObject>(StageClearResource);
+            if(!prefab){Result("CLEAR",message,FishOutIcons.Star,earnedStars,first,yes);return;}
+            CloseModal();
+            var root=(RectTransform)Instantiate(prefab,safe,false).transform;root.name="Stage clear";modal=root.gameObject;
+            root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.offsetMin=root.offsetMax=Vector2.zero;root.localScale=Vector3.one;
+            // The popup is laid out for a 2340-tall screen; shrink the content if the safe area is shorter than the layout.
+            float fit=Mathf.Min(1,(safe.rect.height-60)/1560f);
+            RectTransform Part(string name,Vector2 position)
+            {
+                var part=root.Find(name) as RectTransform;if(!part)return null;
+                part.anchoredPosition=position*fit;part.localScale=Vector3.one*fit;return part;
+            }
+            void Hide(string name){var part=root.Find(name);if(part)part.gameObject.SetActive(false);}
+            Hide("Slider_Level01_l_Blue");Hide("Button01_AdClaim");
+            // The bright painted seabed needs a darker veil than the pack's demo scene.
+            var veil=root.Find("Dimed")?.GetComponent<Image>();if(veil)veil.color=new Color(0,0,0,.72f);
+            var title=Part("Image_Text_Clear",new Vector2(0,700));
+            var group=Part("Group_Stars",new Vector2(0,400));
+            Part("Title_Line01",new Vector2(0,-90));
+            var rewards=Part("ItemFrame02_Basic",new Vector2(0,-250));
+            var button=Part("Button01_Claim",new Vector2(0,-560));
+            // Stars fill left, centre, right; the popup holds one lit and one unlit sprite to copy from.
+            var stars=new Image[3];
+            if(group)
+            {
+                stars[0]=group.Find("Icon_Star (1)")?.GetComponent<Image>();stars[1]=group.Find("Icon_Star")?.GetComponent<Image>();stars[2]=group.Find("Icon_Star (2)")?.GetComponent<Image>();
+                Sprite on=stars[1]?stars[1].sprite:null,off=stars[2]?stars[2].sprite:null;
+                for(int i=0;i<3;i++)if(stars[i])stars[i].sprite=i<earnedStars?on:off;
+            }
+            if(rewards)
+            {
+                var grid=rewards.GetComponent<GridLayoutGroup>();if(grid)grid.childAlignment=TextAnchor.MiddleCenter;
+                for(int i=0;i<rewards.childCount;i++)rewards.GetChild(i).gameObject.SetActive(i==0);
+                if(rewards.childCount>0)
+                {
+                    var coin=rewards.GetChild(0);
+                    var bonus=coin.Find("Label_Tail_Red");if(bonus)bonus.gameObject.SetActive(false);
+                    var amount=coin.Find("Text (TMP)");if(amount)SetLabel(amount,coins.ToString());
+                }
+            }
+            if(title&&!string.IsNullOrEmpty(message))
+            {
+                var line=root.Find("Title_Line01/Text_Title");
+                if(line)
+                {
+                    var note=(RectTransform)Instantiate(line.gameObject,root,false).transform;note.name="Message";
+                    note.anchorMin=note.anchorMax=new Vector2(.5f,.5f);note.anchoredPosition=new Vector2(0,170)*fit;note.sizeDelta=new Vector2(940,140);note.localScale=Vector3.one*fit;
+                    SetLabel(note,message);
+                }
+            }
+            if(button)
+            {
+                button.name="Button "+first;button.sizeDelta=new Vector2(560,button.sizeDelta.y);
+                var label=button.Find("Text (TMP)");if(label)SetLabel(label,first);
+                var click=button.GetComponent<Button>();if(!click)click=button.gameObject.AddComponent<Button>();
+                click.targetGraphic=button.GetComponent<Image>();click.onClick.RemoveAllListeners();click.onClick.AddListener(yes);
+            }
+            if(title&&group)StartCoroutine(Reveal(title,System.Array.FindAll(stars,star=>star!=null),fit));
+        }
+        // Sets a legacy Text or a TextMeshPro label without a compile-time TextMeshPro dependency.
+        private static void SetLabel(Transform target,string value)
+        {
+            foreach(var graphic in target.GetComponents<Graphic>())
+            {
+                if(graphic is Text legacy){legacy.text=value;return;}
+                var property=graphic.GetType().GetProperty("text");
+                if(property!=null&&property.PropertyType==typeof(string)&&property.CanWrite){property.SetValue(graphic,value);return;}
+            }
+        }
         // The card settles in, then the icons pop one at a time.
-        private System.Collections.IEnumerator Reveal(RectTransform panel,Image[] icons)
+        private System.Collections.IEnumerator Reveal(RectTransform panel,Image[] icons,float baseScale=1)
         {
             foreach(var icon in icons)icon.transform.localScale=Vector3.zero;
             const float settle=.18f,gap=.12f,pop=.2f;
             for(float t=0;t<settle+gap*icons.Length+pop;t+=Time.unscaledDeltaTime)
             {
                 if(!panel)yield break;
-                panel.localScale=Vector3.one*Mathf.Lerp(.85f,1,Mathf.Clamp01(t/settle));
+                panel.localScale=Vector3.one*Mathf.Lerp(.85f,1,Mathf.Clamp01(t/settle))*baseScale;
                 for(int i=0;i<icons.Length;i++)
                 {
                     float k=Mathf.Clamp01((t-settle-gap*i)/pop);
@@ -218,7 +291,7 @@ namespace FishOut
                 yield return null;
             }
             if(!panel)yield break;
-            panel.localScale=Vector3.one;
+            panel.localScale=Vector3.one*baseScale;
             foreach(var icon in icons)icon.transform.localScale=Vector3.one;
         }
         public void LevelSelect(int count,int current,int unlocked)

@@ -6,98 +6,94 @@ namespace FishOut
     public static class ShowcaseLevels
     {
         private const int SpreadSamples=24;
-        private sealed class Stage
+        // Spec levels (GDD §8): a 6 × 8 school inside the ring road (8 × 10 cells including the road).
+        private sealed class SpecStage
         {
-            public int width,height,depth,crabs,rocks,first,second;
-            public Stage(int w,int h,int waves,int crabCount,int rockCount,int modelA,int modelB)
-            {width=w;height=h;depth=waves;crabs=crabCount;rocks=rockCount;first=modelA;second=modelB;}
+            public int fish,rocks,crabs,trapped,depth,first,second;
+            public SpecStage(int fishCount,int rockCount,int crabCount,int facingCrab,int waves,int modelA,int modelB)
+            {fish=fishCount;rocks=rockCount;crabs=crabCount;trapped=facingCrab;depth=waves;first=modelA;second=modelB;}
         }
-        // Size, waves of fish to clear in order, crabs, rocks, and the stage's two character models.
-        private static readonly Stage[] Stages=
+        // Fish, rocks, crabs, fish facing a crab (only the free Rescue frees it), waves, two models.
+        private static readonly SpecStage[] Spec=
         {
-            new Stage(5,7,2,0,0,0,2),new Stage(6,8,3,0,0,2,5),new Stage(9,11,4,0,2,0,8),new Stage(10,15,5,1,0,5,0),new Stage(12,18,7,2,3,8,5),
-            new Stage(11,15,7,2,1,8,0),new Stage(11,17,8,2,2,5,8),new Stage(12,17,8,3,2,0,5),new Stage(12,16,9,2,3,8,5),new Stage(12,13,10,3,2,0,8)
+            new SpecStage(3,0,0,0,1,0,2),new SpecStage(10,0,0,0,3,2,5),new SpecStage(20,3,0,0,4,0,8),
+            new SpecStage(20,0,1,1,4,5,0),new SpecStage(20,2,2,1,5,8,5)
         };
-        // Drawn by hand: a formula on so few cells reads as a blob, not a heart.
-        private static readonly string[] Heart=
-        {
-            ".###..###.",
-            "##########",
-            "##########",
-            "##########",
-            "##########",
-            "##########",
-            ".########.",
-            ".########.",
-            "..######..",
-            "...####...",
-            "....##...."
-        };
-        // Level 6 onwards leaves parts of the board empty to draw a shape.
-        private static bool InShape(int number,Vector2Int cell,int width,int height)
-        {
-            float x=(cell.x+.5f)/width*2-1,y=(cell.y+.5f)/height*2-1;
-            switch(number)
-            {
-                case 6: return Mathf.Abs(x)+Mathf.Abs(y)<=.95f;
-                case 7: return Mathf.Abs(x)<=.48f+.75f*Mathf.Abs(y);
-                case 8: return Mathf.Max(Mathf.Abs(x),Mathf.Abs(y))>=.58f;
-                case 9: return Mathf.Abs(y)>=.14f;
-                case 10:
-                {
-                    int row=height-2-cell.y,column=cell.x-1;
-                    return row>=0&&row<Heart.Length&&column>=0&&column<Heart[row].Length&&Heart[row][column]=='#';
-                }
-                default: return true;
-            }
-        }
+        public const int SpecCount=5;
+        public const int SpecWidth=8,SpecHeight=10;
         public static LevelData Get(int number)
         {
-            var stage=Stages[Mathf.Clamp(number,1,Stages.Length)-1];
-            int width=stage.width,height=stage.height;
-            var level=new LevelData{number=number,width=width,height=height,showcase=true,gate=new Vector2Int(width*2/3,height+2)};
-            int gateX=level.gate.x;
-            float top=height-.4f,bottom=-.6f,left=-.3f,right=width-.7f;
-            level.channelLines.Add(ScrewConveyorGeometry.Rounded(new[]{new Vector2(gateX,top),new Vector2(left,top),new Vector2(left,bottom),new Vector2(right,bottom),new Vector2(right,top)},true,1.95f));
-            level.channelLines.Add(ScrewConveyorGeometry.Resample(new[]{new Vector2(gateX,top),new Vector2(gateX,height+2)},.12f));
-            if(number==3)level.channelLines.Add(Smooth(new[]{new Vector2(2.5f,bottom),new Vector2(3,3),new Vector2(4.5f,6),new Vector2(5.5f,9),new Vector2(gateX,top)},16));
-            if(number==4)level.channelLines.Add(Smooth(new[]{new Vector2(4.5f,bottom),new Vector2(7.2f,.9f),new Vector2(7.6f,2.6f),new Vector2(5.4f,4.8f),new Vector2(2.2f,7),new Vector2(1.8f,9.2f),new Vector2(3.2f,11.4f),new Vector2(5.8f,13.2f),new Vector2(gateX,top)},16));
-            if(number==5)
+            number=Mathf.Clamp(number,1,Spec.Length);
+            // Try seeds until the stage also has what its lesson needs (a fish that stops part-way, a crab to warn about).
+            for(int attempt=0;attempt<400;attempt++)
             {
-                level.channelLines.Add(Smooth(new[]{new Vector2(2.5f,bottom),new Vector2(1.8f,3.8f),new Vector2(3.2f,8.5f),new Vector2(5.5f,13.2f),new Vector2(gateX,top)},16));
-                level.channelLines.Add(Smooth(new[]{new Vector2(7.8f,bottom),new Vector2(8.3f,3.8f),new Vector2(7.8f,8.5f),new Vector2(7.7f,13.2f),new Vector2(gateX,top)},16));
+                var level=TryBuild(number,1000*number+attempt);
+                if(level!=null)return level;
             }
-            if(number==7)level.channelLines.Add(Smooth(new[]{new Vector2(5,bottom),new Vector2(8,1),new Vector2(8.5f,3),new Vector2(6,5.5f),new Vector2(2.5f,8),new Vector2(2,10.5f),new Vector2(3.5f,13),new Vector2(6.5f,15),new Vector2(gateX,top)},16));
-            if(number==9)level.channelLines.Add(Smooth(new[]{new Vector2(3,bottom),new Vector2(3,4),new Vector2(5,9),new Vector2(7,13),new Vector2(gateX,top)},16));
-            var random=new System.Random(7100+number);
+            throw new InvalidOperationException("Cannot build stage "+number);
+        }
+        private static LevelData TryBuild(int number,int seed)
+        {
+            var stage=Spec[number-1];int width=SpecWidth,height=SpecHeight;
+            var level=new LevelData{number=number,width=width,height=height,showcase=true};
+            // The conveyor follows the sand road and cave painted on the client's background.
+            PaintedBackdrop.Roads(level,out var ring,out var road,out level.gate);
+            level.channelLines.Add(ring);level.channelLines.Add(road);
+            var random=new System.Random(seed);
             var water=new List<Vector2Int>();
             for(int y=0;y<height;y++)for(int x=0;x<width;x++)
             {
                 var cell=new Vector2Int(x,y);
-                if(!ReefWaterDomain.ContainsWholeCell(level,cell))level.channelCells.Add(cell);
-                else if(InShape(number,cell,width,height))water.Add(cell);
+                // A cell on a rounded corner of the painted board is sand, so fish never start there.
+                if(!ReefWaterDomain.ContainsWholeCell(level,cell)||!PaintedBackdrop.InsideCut(level,cell,CornerMargin))level.channelCells.Add(cell);
+                else water.Add(cell);
             }
             level.channelCells.Add(level.gate);
             var blocked=new HashSet<Vector2Int>();
-            var crabs=PlaceObstacles(level,water,blocked,random,stage.crabs,ObstacleKind.Crab);
-            var rocks=PlaceObstacles(level,water,blocked,random,stage.rocks,ObstacleKind.Rock);
-            // Each crab charges one fish a life to pass; Rescue is the way to avoid paying.
-            foreach(var crab in crabs)AddFacingFish(level,water,blocked,crab,random);
-            // Each rock holds up one fish until it has been hit twice.
-            foreach(var rock in rocks)AddFacingFish(level,water,blocked,rock,random);
-            // Shaped boards stay full, or stray gaps would blur the outline.
-            float holes=number==1||number>=6?0:.03f;
-            foreach(var cell in water)
+            try
             {
-                if(blocked.Contains(cell)||random.NextDouble()<holes)continue;
-                level.fish.Add(new FishData{id=level.fish.Count,cell=cell,facing=Facing.Up,appearance=Palette(number,cell,height)});
+                var crabs=PlaceObstacles(level,water,blocked,random,stage.crabs,ObstacleKind.Crab);
+                PlaceObstacles(level,water,blocked,random,stage.rocks,ObstacleKind.Rock);
+                for(int i=0;i<stage.trapped&&i<crabs.Count;i++)AddFacingFish(level,water,blocked,crabs[i],random);
             }
-            MixDirections(level,blocked,random,stage.depth);return level;
+            catch(InvalidOperationException){return null;}
+            var free=new List<Vector2Int>();foreach(var cell in water)if(!blocked.Contains(cell))free.Add(cell);
+            for(int i=free.Count-1;i>0;i--){int j=random.Next(i+1);var t=free[i];free[i]=free[j];free[j]=t;}
+            int need=stage.fish-level.fish.Count;
+            for(int i=0;i<need&&i<free.Count;i++)
+                level.fish.Add(new FishData{id=level.fish.Count,cell=free[i],facing=Facing.Up,appearance=Palette(number,free[i],height)});
+            try{MixDirections(level,blocked,random,stage.depth);}catch(InvalidOperationException){return null;}
+            return Teaches(level,number)?level:null;
+        }
+        private const float CornerMargin=.3f;
+        // A busy stage reads better when no direction dominates the school.
+        private const float MostOneDirection=.4f;
+        // Stage 2 needs a fish that stops part-way; stages with crabs need a crab that can actually be hit.
+        private static bool Teaches(LevelData level,int number)
+        {
+            var board=new BoardState(level);
+            if(level.fish.Count>=10)
+            {
+                var facing=new int[4];foreach(var f in level.fish)facing[(int)f.facing]++;
+                foreach(var count in facing)if(count>level.fish.Count*MostOneDirection)return false;
+            }
+            if(number==1)foreach(var f in board.Fish)if(!board.Preview(f.id).exits)return false;
+            if(number==2)
+            {
+                bool stops=false;foreach(var f in board.Fish){var m=board.Preview(f.id);if(m.ChangesBoard&&!m.exits)stops=true;}
+                if(!stops)return false;
+            }
+            if(level.obstacles.Exists(o=>o.kind==ObstacleKind.Crab))
+            {
+                bool danger=false;foreach(var f in board.Fish)if(board.Preview(f.id).hitsCrab)danger=true;
+                if(!danger)return false;
+            }
+            return true;
         }
         // Each stage uses two character models only, in bands early on and patches later.
         private static int Palette(int number,Vector2Int cell,int height)
         {
-            var stage=Stages[Mathf.Clamp(number,1,Stages.Length)-1];
+            var stage=Spec[Mathf.Clamp(number,1,Spec.Length)-1];
             bool first=number<=2?cell.y>=height/2:(cell.x/3+cell.y/3)%2==0;
             return first?stage.first:stage.second;
         }

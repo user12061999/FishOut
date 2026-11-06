@@ -37,7 +37,8 @@ namespace FishOut.Tests
         }
         private void Click(string text)
         {
-            var button=game.Hud.modal.GetComponentsInChildren<Button>().First(b=>b.GetComponentInChildren<Text>().text==text);
+            // Built-in dialogs label buttons with Text; the stage clear popup names its button after the label.
+            var button=game.Hud.modal.GetComponentsInChildren<Button>().First(b=>{var label=b.GetComponentInChildren<Text>();return label!=null?label.text==text:b.name=="Button "+text;});
             button.onClick.Invoke();
         }
         [UnityTest]
@@ -99,11 +100,14 @@ namespace FishOut.Tests
             var pixel=game.boardCamera.WorldToScreenPoint(renderer.bounds.center);
             Assert.IsTrue(Physics.Raycast(game.boardCamera.ScreenPointToRay(pixel),out var hit,100));
             Assert.IsNotNull(hit.collider.GetComponentInParent<FishActor>());
-            // Tapping keeps working while earlier fish are still swimming.
+            // Spec §4: a tap is ignored while a fish moves on the board, and accepted again once it is on the road.
             game.TapFish(id);Assert.IsTrue(game.IsBusy);
             int afterFirst=game.Board.Fish.Count;Assert.Less(afterFirst,count);
-            int second=game.Board.FindEscapingFish();Assert.GreaterOrEqual(second,0);game.TapFish(second);
-            Assert.Less(game.Board.Fish.Count,afterFirst);Assert.IsTrue(game.IsBusy);
+            int second=game.Board.FindEscapingFish();Assert.GreaterOrEqual(second,0);
+            Assert.IsTrue(game.FishMovingOnBoard);game.TapFish(second);Assert.AreEqual(afterFirst,game.Board.Fish.Count,"Tap ignored while a fish moves on the board");
+            float wait=Time.realtimeSinceStartup+5;while(game.FishMovingOnBoard&&Time.realtimeSinceStartup<wait)yield return null;
+            Assert.IsFalse(game.FishMovingOnBoard);
+            game.TapFish(second);Assert.Less(game.Board.Fish.Count,afterFirst);Assert.IsTrue(game.IsBusy);
             yield return Idle();Assert.IsFalse(game.World.actors.ContainsKey(id));Assert.IsFalse(game.World.actors.ContainsKey(second));
             other=game.Board.Fish[0].id;int beforeRescue=game.Board.Fish.Count;
             game.Hud.hint.onClick.Invoke();Assert.IsTrue(game.Board.HintUsed);
@@ -113,11 +117,15 @@ namespace FishOut.Tests
         [UnityTest]
         public IEnumerator LineStaysTogetherAndRetryWorksMidSwim()
         {
-            game.StartLevel(1);yield return null;
             System.Collections.Generic.List<int> line=null;
-            foreach(var fish in game.Board.Fish){var found=game.Board.EscapingLine(fish.id);if(found.Count>=2){line=found;break;}}
-            Assert.IsNotNull(line,"Level 1 must contain a line");
+            for(int number=1;number<=FishOutLevels.Count&&line==null;number++)
+            {
+                game.StartLevel(number);yield return null;
+                foreach(var fish in game.Board.Fish){var found=game.Board.EscapingLine(fish.id);if(found.Count>=2){line=found;break;}}
+            }
+            Assert.IsNotNull(line,"Some stage must contain a line");
             var head=game.World.actors[line[0]];var next=game.World.actors[line[1]];
+            float start=Vector3.Distance(head.transform.position,next.transform.position);
             game.TapFish(line[0]);Assert.IsTrue(game.IsBusy);
             Assert.IsNull(game.Board.Find(line[1]),"The whole line leaves together");
             float deadline=Time.realtimeSinceStartup+3;float widest=0;
@@ -126,7 +134,8 @@ namespace FishOut.Tests
                 widest=Mathf.Max(widest,Vector3.Distance(head.transform.position,next.transform.position));
                 yield return null;
             }
-            Assert.LessOrEqual(widest,1.15f,"Fish in a line must stay close");
+            // Cells on the painted board vary in size with perspective, so compare with the starting gap.
+            Assert.LessOrEqual(widest,start*1.3f+.2f,"Fish in a line must stay close");
             game.StartLevel(1);yield return null;
             int id=game.Board.FindEscapingFish();game.TapFish(id);Assert.IsTrue(game.IsBusy);
             game.ConfirmRetry();Assert.IsNotNull(game.Hud.modal,"Retry opens while a fish swims");
@@ -166,18 +175,18 @@ namespace FishOut.Tests
             Assert.IsFalse(game.Board.HintUsed);Assert.IsFalse(game.Board.RescueUsed);
         }
         [UnityTest]
-        public IEnumerator CrabWarningThenTollLetsTheFishPass()
+        public IEnumerator CrabWarningThenEveryBumpCostsALife()
         {
             game.StartLevel(4);int id=game.Board.Fish.First(f=>game.Board.Preview(f.id).hitsCrab).id;
             game.TapFish(id);Assert.IsNotNull(game.Hud.modal);Assert.AreEqual(3,game.Board.Lives);Assert.IsFalse(game.IsBusy);
             Click("GOT IT");Assert.IsNull(game.Hud.modal);
             game.TapFish(id);yield return Idle();Assert.AreEqual(2,game.Board.Lives);
-            Assert.IsFalse(game.Board.Preview(id).hitsCrab,"Once paid, the crab lets this fish through");
+            Assert.IsTrue(game.Board.Preview(id).hitsCrab,"Spec: the crab stays and keeps blocking");
         }
         [UnityTest]
         public IEnumerator BlockedTapChangesNothingAndKeepsTheGuide()
         {
-            game.StartLevel(1);yield return null;
+            game.StartLevel(3);yield return null;
             var blocked=game.Board.Fish.First(f=>!game.Board.Preview(f.id).ChangesBoard);
             var start=blocked.cell;int count=game.Board.Fish.Count;
             game.TapFish(blocked.id);yield return Idle();
@@ -187,12 +196,9 @@ namespace FishOut.Tests
         [UnityTest]
         public IEnumerator ThreeCrabTollsEndTheStageAndRetryStartsOver()
         {
-            game.StartLevel(8);yield return null;
-            for(int paid=1;paid<=3;paid++)
-            {
-                var payer=game.Board.Fish.First(f=>game.Board.Preview(f.id).hitsCrab);
-                game.TapFish(payer.id);yield return Idle();Assert.AreEqual(3-paid,game.Board.Lives);
-            }
+            game.StartLevel(5);yield return null;
+            var payer=game.Board.Fish.First(f=>game.Board.Preview(f.id).hitsCrab);
+            for(int paid=1;paid<=3;paid++){game.TapFish(payer.id);yield return Idle();Assert.AreEqual(3-paid,game.Board.Lives);}
             Assert.IsTrue(game.Board.IsFailed);Assert.IsFalse(game.IsPlayingStage);Assert.IsNotNull(game.Hud.modal);
             Click("RETRY");yield return null;Assert.AreEqual(3,game.Board.Lives);Assert.IsTrue(game.IsPlayingStage);
         }
@@ -200,7 +206,12 @@ namespace FishOut.Tests
         public IEnumerator SwimmersOnTheRoadKeepTheirDistance()
         {
             game.StartLevel(3);yield return null;
-            for(int i=0;i<8;i++){int id=game.Board.FindEscapingFish();if(id>=0)game.TapFish(id);}
+            // Taps wait for the board to be still (spec §4), so fish still reach the road one after another.
+            for(int i=0;i<8;i++)
+            {
+                float wait=Time.realtimeSinceStartup+5;while(game.FishMovingOnBoard&&Time.realtimeSinceStartup<wait)yield return null;
+                int id=game.Board.FindEscapingFish();if(id>=0)game.TapFish(id);
+            }
             float deadline=Time.realtimeSinceStartup+6,closest=float.PositiveInfinity;string detail="";
             while(game.IsBusy&&Time.realtimeSinceStartup<deadline)
             {
@@ -219,20 +230,12 @@ namespace FishOut.Tests
             for(int number=1;number<=FishOutLevels.Count;number++)
             {
                 // Rules alone clear the school; only the final fish plays its full animation.
-                bool rescue=game.Board.Level.obstacles.FindAll(o=>o.kind==ObstacleKind.Crab).Count>=3;
-                for(int guard=0;guard<1000&&(game.Board.Fish.Count>1||game.Board.FindEscapingFish()<0);guard++)
+                // Only a fish facing a crab can be stuck; the free Rescue takes it away first.
+                var trapped=game.Board.Fish.FirstOrDefault(f=>game.Board.Preview(f.id).hitsCrab);
+                if(trapped!=null)Assert.IsTrue(game.Board.Rescue(trapped.id));
+                for(int guard=0;guard<1000&&game.Board.Fish.Count>1;guard++)
                 {
-                    int id=game.Board.FindEscapingFish();
-                    if(id<0)
-                    {
-                        var rock=game.Board.Fish.FirstOrDefault(f=>game.Board.Preview(f.id).hitsRock);
-                        if(rock!=null)id=rock.id;
-                        else
-                        {
-                            id=game.Board.Fish.First(f=>game.Board.Preview(f.id).hitsCrab).id;
-                            if(rescue&&!game.Board.RescueUsed){game.Board.Rescue(id);continue;}
-                        }
-                    }
+                    int id=game.Board.FindEscapingFish();Assert.GreaterOrEqual(id,0,"Level "+number+" is stuck");
                     game.Board.Move(id);
                 }
                 game.TapFish(game.Board.Fish[0].id);

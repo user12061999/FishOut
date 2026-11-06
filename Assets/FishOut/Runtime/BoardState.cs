@@ -78,13 +78,9 @@ namespace FishOut
         public bool IsFailed => Lives == 0;
         public IReadOnlyList<FishData> Fish => fish;
         private readonly List<FishData> fish;
-        // A fish that has paid a crab's life toll may swim past crabs from then on.
-        private readonly HashSet<int> tollPaid = new HashSet<int>();
-        // A rock cracks on the first hit; the next fish to reach it breaks through.
-        private readonly HashSet<Vector2Int> cracked = new HashSet<Vector2Int>();
-        private readonly HashSet<Vector2Int> broken = new HashSet<Vector2Int>();
-        public bool IsCracked(Vector2Int cell) => cracked.Contains(cell);
-        public bool IsBroken(Vector2Int cell) => broken.Contains(cell);
+        // Spec: rocks and crabs never move or break. Kept for the presentation code that asks.
+        public bool IsCracked(Vector2Int cell) => false;
+        public bool IsBroken(Vector2Int cell) => false;
         public BoardState(LevelData level)
         {
             Level = level;
@@ -137,14 +133,12 @@ namespace FishOut
                 }
                 if (fish.Any(other => other.id != id && other.cell == candidate))
                     return new MoveResult(id, f.cell, next, false, false);
-                var obstacle = Level.obstacles.Find(o => o.cell == candidate && !broken.Contains(o.cell));
+                // A crab ahead always stops the fish and costs a life, every time; a rock just stops it.
+                var obstacle = Level.obstacles.Find(o => o.cell == candidate);
                 if (obstacle != null)
-                {
-                    if (obstacle.kind == ObstacleKind.Crab && !tollPaid.Contains(id))
-                        return new MoveResult(id, f.cell, next, false, true);
-                    if (obstacle.kind == ObstacleKind.Rock && !cracked.Contains(candidate))
-                        return new MoveResult(id, f.cell, next, false, false, true);
-                }
+                    return obstacle.kind == ObstacleKind.Crab
+                        ? new MoveResult(id, f.cell, next, false, true)
+                        : new MoveResult(id, f.cell, next, false, false, true);
                 next = candidate;
                 cells?.Add(next);
             }
@@ -153,13 +147,10 @@ namespace FishOut
         public MoveResult Move(int id)
         {
             if (IsFailed || IsClear) throw new InvalidOperationException("Stage has ended");
-            var trace = new List<Vector2Int>();
-            var result = TraceForward(id, trace);
-            foreach (var cell in trace) if (cracked.Contains(cell)) broken.Add(cell);
-            if (result.hitsRock) cracked.Add(result.to + Direction(Find(id).facing));
+            var result = TraceForward(id, null);
             if (result.exits) fish.Remove(Find(id));
             else Find(id).cell = result.to;
-            if (result.hitsCrab) { Lives = Math.Max(0, Lives - 1); tollPaid.Add(id); }
+            if (result.hitsCrab) Lives = Math.Max(0, Lives - 1);
             return result;
         }
         // Touching fish facing the same way form one line. Once its front fish can escape, the
@@ -190,9 +181,8 @@ namespace FishOut
         public int UseHint()
         {
             if (HintUsed || IsFailed || IsClear) return -1;
+            // Spec: only a fish that can leave now; otherwise the hint is not used up.
             var id = FindEscapingFish();
-            // With nobody free, point at a fish that can make progress by hitting a rock.
-            if (id < 0) foreach (var f in fish) if (Preview(f.id).hitsRock) { id = f.id; break; }
             if (id >= 0) HintUsed = true;
             return id;
         }
@@ -208,7 +198,8 @@ namespace FishOut
             get
             {
                 if (IsClear || IsFailed) return false;
-                foreach (var f in fish) { var move = Preview(f.id); if (move.ChangesBoard || move.hitsCrab || move.hitsRock) return false; }
+                // Spec: deadlocked when no fish can move or escape (bumping into a crab or rock moves nothing).
+                foreach (var f in fish) if (Preview(f.id).ChangesBoard) return false;
                 return true;
             }
         }
