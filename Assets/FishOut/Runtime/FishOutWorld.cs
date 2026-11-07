@@ -50,7 +50,7 @@ namespace FishOut
                 }
             }
             // Obstacles further up the painted board are drawn a little smaller.
-            if(PaintedBackdrop.Warps(level))foreach(Transform piece in pieces)piece.localScale*=PaintedBackdrop.ScaleAt(piece.position);
+            if(PaintedBackdrop.Warps(level))foreach(Transform piece in pieces){piece.localScale*=PaintedBackdrop.ScaleAt(piece.position);piece.position+=PaintedBackdrop.PieceShift(piece.position);}
             var batcher=gameObject.AddComponent<FishBatcher>();
             foreach(var data in board.Fish)
             {

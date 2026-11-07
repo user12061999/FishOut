@@ -238,6 +238,14 @@ namespace FishOut.Editor
             EditorGUILayout.Slider(so.FindProperty("edgeOffset"), -.5f, .5f, new GUIContent("Nới / thu viền cắt", "Dương: viền cắt lùi ra ngoài; âm: thu vào trong"));
             EditorGUILayout.PropertyField(so.FindProperty("checker"), new GUIContent("Hiện ô cờ", "Tắt: mặt bàn cát trơn của nền (lưới ẩn theo spec), vẫn giữ gờ và rãnh quanh bàn"));
             EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Quân cờ trong ô", EditorStyles.boldLabel);
+            var piece = so.FindProperty("pieceOffset");
+            var nudge = piece.vector2Value;
+            nudge.x = EditorGUILayout.Slider(new GUIContent("Lệch ngang (ô)", "Dương: sang phải"), nudge.x, -.5f, .5f);
+            nudge.y = EditorGUILayout.Slider(new GUIContent("Lệch dọc (ô)", "Dương: lên phía trên bàn"), nudge.y, -.5f, .5f);
+            piece.vector2Value = nudge;
+            EditorGUILayout.Slider(so.FindProperty("pieceScale"), .6f, 1.4f, "Cỡ con vật / đá");
+            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Đường cá bơi", EditorStyles.boldLabel);
             if (!data.customRoad)
             {

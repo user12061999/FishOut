@@ -45,7 +45,8 @@ namespace FishOut
             safe = Rect("Safe area", transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             home = Rect("Home", safe, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero).gameObject;
             Label(home.transform,"FISH OUT",new Vector2(.5f,.88f),new Vector2(950,140),100,Color.white);
-            homeLevel = Label(home.transform,"LEVEL 1",new Vector2(.5f,.255f),new Vector2(800,60),32,Color.white);
+            if(skin&&skin.plate)SkinPlate(home.transform,"Level plate",new Vector2(.5f,.258f),new Vector2(320,78));
+            homeLevel = Label(home.transform,"LEVEL 1",new Vector2(.5f,.258f),new Vector2(800,60),34,Color.white);
             Button(home.transform,"PLAY",new Vector2(.5f,.18f),new Vector2(660,125),Teal,()=>game.StartLevel(game.CurrentLevel));
             Button(home.transform,"LEVELS",new Vector2(.5f,.095f),new Vector2(660,100),new Color(.10f,.36f,.43f),()=>game.OpenLevelSelect(),36);
             gameplay = Rect("Gameplay",safe,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero).gameObject;
@@ -94,7 +95,14 @@ namespace FishOut
         public Button Button(Transform parent,string text,Vector2 anchor,Vector2 size,Color color,UnityAction action,int fontSize=42)
         {
             var rt=Rect(text,parent,anchor,anchor,Vector2.zero,size);
-            var b=Clickable(rt,color,action);
+            Sprite sprite=null;
+            if(skin)
+            {
+                bool small=size.x<200;
+                if(small)sprite=color==new Color(.97f,.76f,.32f)?skin.currentLevelButton:skin.levelButton;
+                else sprite=color==Teal?skin.primaryButton:skin.secondaryButton;
+            }
+            var b=Clickable(rt,color,action,sprite);
             var label=Label(rt,text,new Vector2(.5f,.5f),size-new Vector2(16,8),fontSize,color==new Color(.97f,.76f,.32f)?Ink:Color.white);
             return b;
         }
@@ -193,9 +201,19 @@ namespace FishOut
             var dim=overlay.gameObject.AddComponent<Image>(); dim.color=new Color(.015f,.09f,.14f,dimming);
             var panel=Rect("Dialog",overlay,new Vector2(.5f,.5f),new Vector2(.5f,.5f),Vector2.zero,new Vector2(920,800));
             var card=panel.gameObject.AddComponent<Image>(); card.sprite=RoundSprite(); card.type=Image.Type.Sliced; card.color=new Color(.93f,.98f,.97f);
-            Plate(panel,"Title ribbon",new Vector2(.5f,.9f),new Vector2(800,130),ribbon);
-            Label(panel,title,new Vector2(.5f,.9f),new Vector2(780,115),56,Color.white);
-            var body=Label(panel,message,new Vector2(.5f,.64f),new Vector2(810,210),32,Ink);body.name="Message";
+            if(skin&&skin.popup)
+            {
+                // GUI Pro popup: blue card with the ribbon title riding over its top edge.
+                card.sprite=skin.popup;card.color=Color.white;
+                Icon(panel,"Title ribbon",skin.ribbon,Color.white,new Vector2(.5f,.97f),1).rectTransform.sizeDelta=new Vector2(760,200);
+                Label(panel,title,new Vector2(.5f,.985f),new Vector2(560,110),50,Color.white);
+            }
+            else
+            {
+                Plate(panel,"Title ribbon",new Vector2(.5f,.9f),new Vector2(800,130),ribbon);
+                Label(panel,title,new Vector2(.5f,.9f),new Vector2(780,115),56,Color.white);
+            }
+            var body=Label(panel,message,new Vector2(.5f,.64f),new Vector2(810,210),32,skin?Color.white:Ink);body.name="Message";
             return panel;
         }
         public void Choice(string title,string message,string first,UnityAction yes,string second=null,UnityAction no=null)
@@ -333,10 +351,11 @@ namespace FishOut
         }
         private void Setting(Transform p,string caption,float y,bool value,UnityAction<bool> changed)
         {
-            Label(p,caption,new Vector2(.36f,y),new Vector2(530,70),32,Ink);
-            var root=Rect(caption+" toggle",p,new Vector2(.82f,y),new Vector2(.82f,y),Vector2.zero,new Vector2(80,70));
-            var bg=root.gameObject.AddComponent<Image>(); bg.sprite=RoundSprite(); bg.type=Image.Type.Sliced; bg.color=new Color(.70f,.81f,.82f);
+            Label(p,caption,new Vector2(.36f,y),new Vector2(530,70),32,skin?Color.white:Ink);
+            var root=Rect(caption+" toggle",p,new Vector2(.82f,y),new Vector2(.82f,y),Vector2.zero,skin?new Vector2(84,84):new Vector2(80,70));
+            var bg=root.gameObject.AddComponent<Image>(); bg.sprite=skin&&skin.toggleBg?skin.toggleBg:RoundSprite(); bg.type=Image.Type.Sliced; bg.color=skin?Color.white:new Color(.70f,.81f,.82f);
             var check=Rect("On",root,new Vector2(.2f,.2f),new Vector2(.8f,.8f),Vector2.zero,Vector2.zero).gameObject.AddComponent<Image>(); check.color=Teal; check.sprite=RoundSprite();
+            if(skin&&skin.toggleCheck){check.sprite=skin.toggleCheck;check.color=Color.white;check.preserveAspect=true;check.rectTransform.anchorMin=new Vector2(.12f,.12f);check.rectTransform.anchorMax=new Vector2(.88f,.92f);}
             var toggle=root.gameObject.AddComponent<Toggle>(); toggle.targetGraphic=bg; toggle.graphic=check; toggle.isOn=value; toggle.onValueChanged.AddListener(changed);
         }
         private void UpdateSafeArea()

@@ -53,7 +53,8 @@ namespace FishOut
                     float t=Mathf.Repeat(Time.time+nudgePhase,nudgePeriod);
                     if(t<NudgeLength){float k=t/NudgeLength;lunge=Mathf.Sin(k*Mathf.PI)*(1-.35f*k);}
                 }
-                Visual.localPosition=resting+Vector3.up*(Mathf.Sin(Time.time*2.8f+Id)*.025f)+Vector3.forward*(lunge*NudgeAmount);
+                var shift=PaintedBackdrop.Current!=null?transform.InverseTransformVector(PaintedBackdrop.PieceShift(transform.position)):Vector3.zero;
+                Visual.localPosition=resting+shift+Vector3.up*(Mathf.Sin(Time.time*2.8f+Id)*.025f)+Vector3.forward*(lunge*NudgeAmount);
                 Visual.localRotation=Quaternion.Euler(lunge*NudgeTilt,0,0)*restingRotation;
             }
             // Smaller further up the painted board, growing as it swims towards the camera.

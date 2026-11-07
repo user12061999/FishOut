@@ -28,6 +28,14 @@ namespace FishOut.Editor
             skin.fishIcon = Load("Icon_PictoIcons/128/PictoIcon_Fish.Png");
             skin.hintIcon = Load("Icon_PictoIcons/128/PictoIcon_Bulb.Png");
             skin.rescueIcon = Load("Icon_PictoIcons/128/PictoIcon_Fishing.Png");
+            skin.popup = Load("Popup/Popup01_Basic_Single.png");
+            skin.ribbon = Load("Label/Title_Ribbon01_Blue.png");
+            skin.primaryButton = Load("Button/Button01_l_Yellow.png");
+            skin.secondaryButton = Load("Button/Button01_l_Sky.png");
+            skin.levelButton = Load("Button/Button01_s_Blue.png");
+            skin.currentLevelButton = Load("Button/Button01_s_Yellow.png");
+            skin.toggleBg = Load("Button/Button01_s_DarkGray.png");
+            skin.toggleCheck = Load("UI_Etc/Toggle_Check_Single_Icon.png");
             EditorUtility.SetDirty(skin); AssetDatabase.SaveAssetIfDirty(skin);
             Debug.Log("Fish Out: HUD skin updated at " + AssetPath);
         }

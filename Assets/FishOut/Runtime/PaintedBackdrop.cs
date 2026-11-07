@@ -126,12 +126,21 @@ namespace FishOut
             if (Current == null) return 1;
             var g = ImageToGrid(Current, WorldToImage(Current, world));
             float here = CellSize(Current, g), middle = CellSize(Current, Cells(Current).center);
-            return Mathf.Pow(Mathf.Max(.2f, here / middle), ScaleExponent);
+            return Mathf.Pow(Mathf.Max(.2f, here / middle), ScaleExponent) * Calibration.pieceScale;
         }
         private static float CellSize(LevelData level, Vector2 g)
         {
             var o = GridToImage(level, g);
             return Mathf.Sqrt(Mathf.Abs(Cross(GridToImage(level, g + Vector2.right) - o, GridToImage(level, g + Vector2.up) - o)));
+        }
+        // How far a piece standing at this world point is nudged inside its cell (calibrated by hand, in cells).
+        public static Vector3 PieceShift(Vector3 world)
+        {
+            if (Current == null) return Vector3.zero;
+            var offset = Calibration.pieceOffset;
+            if (offset.sqrMagnitude < 1e-8f) return Vector3.zero;
+            var g = ImageToGrid(Current, WorldToImage(Current, world));
+            return GridToWorld(Current, g + offset, world.y) - GridToWorld(Current, g, world.y);
         }
         // World length of one cell step around a world point (the shorter of the two grid axes); 1 off the painting.
         public static float CellWorldSize(Vector3 world)

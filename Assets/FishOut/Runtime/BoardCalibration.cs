@@ -13,6 +13,10 @@ namespace FishOut
         [Range(0, 3)] public float radiusTopLeft = 1.725f, radiusTopRight = 1.175f, radiusBottomRight = 1.175f, radiusBottomLeft = 1.5f;
         [Tooltip("Draw the board's checker cells; off leaves the painted sand plain (spec: hidden grid), keeping the raised rim.")]
         public bool checker = true;
+        [Tooltip("Nudges every fish, crab and rock inside its cell (cells; x right, y towards the top of the board).")]
+        public Vector2 pieceOffset;
+        [Tooltip("Size of the fish, crabs and rocks.")]
+        [Range(.6f, 1.4f)] public float pieceScale = 1f;
         [Tooltip("Moves the whole cut edge out (+) or in (−), in cells.")]
         [Range(-.5f, .5f)] public float edgeOffset;
         [Tooltip("How far the fish road runs outside the board, in cells.")]

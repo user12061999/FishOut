@@ -25,3 +25,11 @@ MonoBehaviour:
   fishIcon: {fileID: 21300000, guid: cdd30210bad4a4a92a6ffb1f2ce0bdde, type: 3}
   hintIcon: {fileID: 21300000, guid: 4cb7b1cae639a483292bd0f94c277113, type: 3}
   rescueIcon: {fileID: 21300000, guid: 7c4a1a566ec124b24a46ff644524810c, type: 3}
+  popup: {fileID: 21300000, guid: 95f9ec13367f946e0bea5a45049c948e, type: 3}
+  ribbon: {fileID: 21300000, guid: 4705dc388c8e646b08b96ac581e8e1ae, type: 3}
+  primaryButton: {fileID: 21300000, guid: 6cdadcc1a39954748abf7d3d4351e1e6, type: 3}
+  secondaryButton: {fileID: 21300000, guid: fb9b001f46fb043f4a4f6450d7d3e6c1, type: 3}
+  levelButton: {fileID: 21300000, guid: 769ff630d5d724abbafe6154aa0ef82f, type: 3}
+  currentLevelButton: {fileID: 21300000, guid: f696c5de5bea644b3ba78434e4939f8d, type: 3}
+  toggleBg: {fileID: 21300000, guid: 6811196040b84412ea2ffd2686edae8e, type: 3}
+  toggleCheck: {fileID: 21300000, guid: 6b557df3ef5e446ae9cff8ab68c0f848, type: 3}
