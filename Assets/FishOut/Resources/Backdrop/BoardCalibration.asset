@@ -21,6 +21,8 @@ MonoBehaviour:
   radiusBottomRight: 1.42
   radiusBottomLeft: 1.5
   checker: 1
+  pieceOffset: {x: 0.07, y: -0.08}
+  pieceScale: 1
   edgeOffset: 0
   roadSide: 0.43
   roadBottom: 0.41
