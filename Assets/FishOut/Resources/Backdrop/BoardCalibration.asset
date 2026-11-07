@@ -20,6 +20,7 @@ MonoBehaviour:
   radiusTopRight: 1.175
   radiusBottomRight: 1.175
   radiusBottomLeft: 1.5
+  checker: 1
   edgeOffset: 0
   roadSide: 0.43
   roadBottom: 0.41
@@ -28,6 +29,7 @@ MonoBehaviour:
   - {x: 625.8, y: 284.2}
   - {x: 635.2, y: 200.6}
   - {x: 639.9, y: 142.1}
+  caveHidden: {x: 643, y: 40}
   customRoad: 0
   roadPoints:
   - {x: 609.3338, y: 368.46442}
