@@ -36,6 +36,7 @@ namespace FishOut
             Release(topTexture);
             topTexture = null; topKey = null;
         }
+        private const float PaintingHeight = -.2f;
         private const float Pitch = 50, ScaleExponent = .85f;
         private static Texture2D texture;
 
@@ -390,10 +391,15 @@ namespace FishOut
         }
         // Baked once per calibration: sand-grained checker, a lit top-left / shaded bottom-right bevel, a thin lip,
         // and a soft shadow on the painted sand that falls towards the camera, so the board seems to rise from the sand.
+        private const string BoardMaskResource = "Backdrop/BoardMask";
         private static Texture2D BoardTopTexture(LevelData level)
         {
             var cal = Calibration;
-            string key = level.width + "x" + level.height + "|" + cal.topLeft + cal.topRight + cal.bottomRight + cal.bottomLeft + "|" + cal.radiusTopLeft + "," + cal.radiusTopRight + "," + cal.radiusBottomRight + "," + cal.radiusBottomLeft + "," + cal.edgeOffset + "," + cal.checker;
+            // When the painting ships a mask of its board surface, the checker fills exactly that surface and the
+            // painting's own rim and crease are left to show; otherwise the rim and shadow are drawn here.
+            var mask = Resources.Load<Texture2D>(BoardMaskResource);
+            bool masked = mask && mask.isReadable;
+            string key = level.width + "x" + level.height + "|" + cal.topLeft + cal.topRight + cal.bottomRight + cal.bottomLeft + "|" + cal.radiusTopLeft + "," + cal.radiusTopRight + "," + cal.radiusBottomRight + "," + cal.radiusBottomLeft + "," + cal.edgeOffset + "," + cal.checker + "," + masked;
             if (topTexture && topKey == key) return topTexture;
             Release(topTexture);
             var outline = OutlineGrid(level).ToArray(); int n = outline.Length; float area = 0;
@@ -417,6 +423,18 @@ namespace FishOut
             for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
             {
                 var g = new Vector2(e.xMin + (x + .5f) * e.width / w, e.yMin + (y + .5f) * e.height / h);
+                if (masked)
+                {
+                    if (!cal.checker) { pixels[y * w + x] = default; continue; }
+                    var uvImage = GridToImage(level, g);
+                    float inMask = uvImage.x < 0 || uvImage.x > 1 || uvImage.y < 0 || uvImage.y > 1 ? 0 : mask.GetPixelBilinear(uvImage.x, 1 - uvImage.y).r;
+                    if (inMask <= .002f) { pixels[y * w + x] = default; continue; }
+                    int mx = Mathf.FloorToInt((g.x - c.xMin) / cellW), my = Mathf.FloorToInt((g.y - c.yMin) / cellH);
+                    var cell = ((mx + my) & 1) == 0 ? light : dark;
+                    float grainMasked = .55f * Noise(g * 9f) + .30f * Noise(g * 23f) + .15f * Noise(g * 57f);
+                    cell *= 1 + (grainMasked - .5f) * .045f; cell.a = inMask;
+                    pixels[y * w + x] = cell; continue;
+                }
                 float d = OutlineDistance(outline, normals, g, out var normal);
                 if (d > ShadowReach + ShadowDrop + .02f) { pixels[y * w + x] = default; continue; }
                 // Shadow on the sand: an even contact shade plus a drop towards the bottom of the screen.
@@ -477,9 +495,12 @@ namespace FishOut
             var rotation = Quaternion.Euler(layout.pitch, 0, 0);
             float screenDepth = layout.depth * Mathf.Sin(layout.pitch * Mathf.Deg2Rad);
             camera.rect = new Rect(0, 0, 1, 1);
-            camera.orthographicSize = Mathf.Min(screenDepth * .5f, layout.width / (2 * aspect));
+            // Slightly inside the painting on both axes, so no clear colour shows at any edge.
+            camera.orthographicSize = Mathf.Min(screenDepth * .5f, layout.width / (2 * aspect)) * .99f;
             camera.transform.rotation = rotation;
-            camera.transform.position = layout.center - rotation * Vector3.forward * 40;
+            // Aim at the painting's own plane (it lies below the board), otherwise the tilt shifts it down and
+            // leaves a strip of background colour along the top of the screen.
+            camera.transform.position = layout.center + Vector3.up * PaintingHeight - rotation * Vector3.forward * 40;
         }
     }
 }
