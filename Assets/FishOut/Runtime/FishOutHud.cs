@@ -103,7 +103,17 @@ namespace FishOut
                 else sprite=color==Teal?skin.primaryButton:skin.secondaryButton;
             }
             var b=Clickable(rt,color,action,sprite);
+            if(skin&&size.x>=200)
+            {
+                // Pack buttons hug their label: bigger type, and only as wide as the word needs (never wider than asked).
+                fontSize=Mathf.Max(fontSize,40);size=new Vector2(size.x,Mathf.Max(size.y,104));
+            }
             var label=Label(rt,text,new Vector2(.5f,.5f),size-new Vector2(16,8),fontSize,color==new Color(.97f,.76f,.32f)?Ink:Color.white);
+            if(skin&&size.x>=200)
+            {
+                float width=Mathf.Clamp(label.preferredWidth+150,300,size.x);
+                rt.sizeDelta=new Vector2(width,size.y);label.rectTransform.sizeDelta=new Vector2(width-16,size.y-8);
+            }
             return b;
         }
         private Button Clickable(RectTransform rt,Color color,UnityAction action,Sprite sprite=null)
@@ -221,15 +231,17 @@ namespace FishOut
         public void Choice(string title,string message,string first,UnityAction yes,string second=null,UnityAction no=null)
         {
             var p=ShowModal(title,message);
-            Button(p,first,new Vector2(.5f,.31f),new Vector2(740,100),Teal,yes,36);
-            if(second!=null) Button(p,second,new Vector2(.5f,.15f),new Vector2(740,90),new Color(.30f,.46f,.50f),no,30);
+            bool pair=skin&&second!=null;
+            Button(p,first,pair?new Vector2(.72f,.17f):new Vector2(.5f,.31f),new Vector2(pair?360:740,100),Teal,yes,36);
+            if(second!=null) Button(p,second,pair?new Vector2(.28f,.17f):new Vector2(.5f,.15f),new Vector2(pair?360:740,90),new Color(.30f,.46f,.50f),no,30);
         }
         public void Result(string title,string message,Sprite icon,int earned,string first,UnityAction yes,string second=null,UnityAction no=null)
         {
             bool won=icon==FishOutIcons.Star;
             var panel=ShowModal(title,message,won?Teal:new Color(.86f,.24f,.28f),.45f);
-            Button(panel,first,new Vector2(.5f,.31f),new Vector2(740,100),Teal,yes,36);
-            if(second!=null) Button(panel,second,new Vector2(.5f,.15f),new Vector2(740,90),new Color(.30f,.46f,.50f),no,30);
+            bool pair=skin&&second!=null;
+            Button(panel,first,pair?new Vector2(.72f,.17f):new Vector2(.5f,.31f),new Vector2(pair?360:740,100),Teal,yes,36);
+            if(second!=null) Button(panel,second,pair?new Vector2(.28f,.17f):new Vector2(.5f,.15f),new Vector2(pair?360:740,90),new Color(.30f,.46f,.50f),no,30);
             var body=(RectTransform)panel.Find("Message");body.anchorMin=body.anchorMax=new Vector2(.5f,.53f);
             var filled=won?new Color(1f,.76f,.16f):new Color(1f,.3f,.38f);
             var icons=new Image[3];
