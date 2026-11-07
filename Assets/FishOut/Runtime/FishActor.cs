@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace FishOut
@@ -16,6 +17,10 @@ namespace FishOut
         // Heading cues (idle nudge + teardrop shadow) are switched off for now at the designer's request (07/11).
         public static bool HeadingCues=false;
         private float nudgePeriod,nudgePhase;
+        // Dizzy: stars circling over the head and a wobble after bumping into something.
+        private const float DizzyStars=3,DizzyRadius=.32f,DizzySpin=7f,DizzyWobble=12f,DizzySize=.3f;
+        private Coroutine dizzy;
+        private float wobble;
         private float popLeft,popLength,popSize;
         public void Configure(int id, Transform visual, Material glow)
         {
@@ -30,6 +35,49 @@ namespace FishOut
             halo.enabled=false;
         }
         public void Pop(float size,float seconds){popSize=size;popLength=popLeft=seconds;}
+        public void Dizzy(float seconds=.9f)
+        {
+            if(!isActiveAndEnabled||!Visual)return;
+            if(dizzy!=null)StopCoroutine(dizzy);
+            foreach(Transform child in transform)if(child.name=="Dizzy stars")Destroy(child.gameObject);
+            dizzy=StartCoroutine(DizzyRoutine(seconds));
+        }
+        private IEnumerator DizzyRoutine(float seconds)
+        {
+            var holder=new GameObject("Dizzy stars").transform;holder.SetParent(transform,false);
+            float scale=Mathf.Max(.01f,transform.lossyScale.y);
+            holder.localPosition=Vector3.up*((VisibleBounds().max.y-transform.position.y+.08f)/scale);
+            var sprite=FishOutIcons.Star;var stars=new SpriteRenderer[(int)DizzyStars];
+            for(int i=0;i<stars.Length;i++)
+            {
+                stars[i]=new GameObject("Star").AddComponent<SpriteRenderer>();
+                stars[i].sprite=sprite;stars[i].color=new Color(1f,.82f,.12f);stars[i].sortingOrder=10;
+                stars[i].transform.SetParent(holder,false);
+                // A darker, slightly larger star behind gives the cartoon outline so it reads on the pale sand.
+                var rim=new GameObject("Outline").AddComponent<SpriteRenderer>();
+                rim.sprite=sprite;rim.color=new Color(.55f,.28f,.04f);rim.sortingOrder=9;
+                rim.transform.SetParent(stars[i].transform,false);rim.transform.localScale=Vector3.one*1.35f;rim.transform.localPosition=new Vector3(0,0,.001f);
+            }
+            float size=DizzySize/Mathf.Max(.01f,sprite.bounds.size.x);
+            var view=Camera.main?Camera.main.transform:null;
+            for(float t=0;t<seconds;t+=Time.deltaTime)
+            {
+                float k=t/seconds,pop=Mathf.Clamp01(t/.15f),fade=1-Mathf.Clamp01((k-.7f)/.3f);
+                wobble=Mathf.Sin(t*24f)*DizzyWobble*(1-k);
+                for(int i=0;i<stars.Length;i++)
+                {
+                    float a=t*DizzySpin+i*Mathf.PI*2/stars.Length;
+                    var star=stars[i].transform;
+                    star.localPosition=new Vector3(Mathf.Cos(a)*DizzyRadius,Mathf.Sin(a*2)*.03f,Mathf.Sin(a)*DizzyRadius)/scale;
+                    star.localScale=Vector3.one*size*pop*(.85f+.15f*Mathf.Sin(a*3))/scale;
+                    if(view)star.rotation=view.rotation;
+                    var c=stars[i].color;c.a=fade;stars[i].color=c;
+                    var rimRenderer=star.GetChild(0).GetComponent<SpriteRenderer>();var rc=rimRenderer.color;rc.a=fade;rimRenderer.color=rc;
+                }
+                yield return null;
+            }
+            wobble=0;Destroy(holder.gameObject);dizzy=null;
+        }
         public void Highlight(bool value) { if(halo) halo.enabled=value; }
         public void SetSwimming(bool value)
         {
@@ -55,7 +103,7 @@ namespace FishOut
                 }
                 var shift=PaintedBackdrop.Current!=null?transform.InverseTransformVector(PaintedBackdrop.PieceShift(transform.position)):Vector3.zero;
                 Visual.localPosition=resting+shift+Vector3.up*(Mathf.Sin(Time.time*2.8f+Id)*.025f)+Vector3.forward*(lunge*NudgeAmount);
-                Visual.localRotation=Quaternion.Euler(lunge*NudgeTilt,0,0)*restingRotation;
+                Visual.localRotation=Quaternion.Euler(lunge*NudgeTilt,0,wobble)*restingRotation;
             }
             // Smaller further up the painted board, growing as it swims towards the camera.
             if(PaintedBackdrop.Current!=null) transform.localScale=Vector3.one*PaintedBackdrop.ScaleAt(transform.position);

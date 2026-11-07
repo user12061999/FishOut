@@ -225,7 +225,7 @@ namespace FishOut
             moving.Add(id);
             var actor=world.actors[id];var rest=actor.transform.position;
             var step=BoardState.Direction(Board.Find(id).facing);var vector=new Vector3(step.x,0,step.y);
-            audioPlayer.Play("buffer");world.PlayEffect("Bump",rest+vector*.45f);
+            audioPlayer.Play("buffer");world.PlayEffect("Bump",rest+vector*.45f);actor.Dizzy();
             var blocker=Board.BlockerOf(id);
             if(blocker!=null&&world.actors.TryGetValue(blocker.id,out var other)&&other)other.Pop(.15f,.15f);
             for(float t=0;t<.14f;t+=Time.deltaTime){actor.transform.position=rest+vector*Mathf.Sin(t/.14f*Mathf.PI)*.22f;yield return null;}
@@ -289,7 +289,7 @@ namespace FishOut
                 var direction=BoardState.Direction(Board.Find(id).facing);var vector=new Vector3(direction.x,0,direction.y);
                 for(float t=0;t<.18f;t+=Time.deltaTime){actor.transform.position=end+vector*Mathf.Sin(t/.18f*Mathf.PI)*.07f;yield return null;}
                 actor.transform.position=end;actor.SetSwimming(false);audioPlayer.Play(result.hitsCrab?"reject":"land");
-                world.PlayEffect(result.hitsCrab?"CrabHit":"Bump",end);
+                world.PlayEffect(result.hitsCrab?"CrabHit":"Bump",end);actor.Dizzy();
             }
             if(result.hitsCrab){hud.Hazard();hud.Toast("CRAB!  -1 LIFE");if(vibration)Handheld.Vibrate();}
             if(CurrentLevel==2&&id==stopLessonFish&&!result.exits)hud.instructions.text="Fish stay where they stop. Clear a path, then tap again.";
