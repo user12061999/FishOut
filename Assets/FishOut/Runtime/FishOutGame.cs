@@ -415,7 +415,7 @@ namespace FishOut
         }
         // A fish already on the road has the right of way: one about to join waits at the edge
         // while a road fish behind or level with it passes the join point.
-        private const float JoinLead=1.2f,JoinRadius=1.1f;
+        private const float JoinLead=1.6f,JoinRadius=1.35f;
         // Follower → the fish directly in front of it in the line it left with.
         private readonly Dictionary<WaypointMover,WaypointMover> linePredecessor=new Dictionary<WaypointMover,WaypointMover>();
         private void HoldBeforeJoining(WaypointMover fish)

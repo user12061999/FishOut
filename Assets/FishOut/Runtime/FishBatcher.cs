@@ -40,10 +40,15 @@ namespace FishOut
                 if(count>0)Graphics.RenderMeshInstanced(group.settings,group.mesh,0,group.matrices,count);
             }
         }
+        // The shadow is a teardrop (round under the head, tapering behind), turned with the fish, so even a fish
+        // seen from behind shows which way it faces. It is a little longer than wide and set back towards the tail.
+        private const float ShadowLength=1.45f,ShadowBack=.2f;
         private static Matrix4x4 ShadowMatrix(Transform owner)
         {
-            var position=owner.position;position.y=ShadowHeight;
-            return Matrix4x4.TRS(position,Quaternion.Euler(90,0,0),Vector3.one*ShadowSize*owner.lossyScale.x);
+            float size=ShadowSize*owner.lossyScale.x;
+            var forward=owner.forward;forward.y=0;if(forward.sqrMagnitude<1e-6f)forward=Vector3.forward;forward.Normalize();
+            var position=owner.position-forward*(ShadowBack*size);position.y=ShadowHeight;
+            return Matrix4x4.TRS(position,Quaternion.LookRotation(forward)*Quaternion.Euler(90,0,0),new Vector3(size,size*ShadowLength,1));
         }
     }
 }

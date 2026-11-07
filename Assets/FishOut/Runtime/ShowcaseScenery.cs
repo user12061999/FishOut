@@ -150,9 +150,15 @@ namespace FishOut
         private static Texture2D Shadow()
         {
             const int size=64;var pixels=new Color32[size*size];
+            // Teardrop: texture up (+v) is the fish's front. A round head and a tail that narrows behind it.
+            const float head=.17f,radius=.3f,tail=-.48f,soft=.16f;
             for(int y=0;y<size;y++)for(int x=0;x<size;x++)
             {
-                float d=new Vector2(x-31.5f,y-31.5f).magnitude/31.5f;float alpha=Mathf.Clamp01(1-d);
+                var p=new Vector2((x+.5f)/size-.5f,(y+.5f)/size-.5f);
+                float d;
+                if(p.y>=head)d=Vector2.Distance(p,new Vector2(0,head))-radius;
+                else{float k=Mathf.Clamp01((p.y-tail)/(head-tail));d=Mathf.Max(Mathf.Abs(p.x)-radius*Mathf.Pow(k,.75f),tail-p.y);}
+                float alpha=Mathf.Clamp01(-d/soft+.35f);
                 pixels[y*size+x]=new Color32(92,58,24,(byte)(alpha*alpha*(3-2*alpha)*150));
             }
             var texture=new Texture2D(size,size,TextureFormat.RGBA32,false){name="Soft shadow",wrapMode=TextureWrapMode.Clamp};
