@@ -9,7 +9,7 @@ namespace FishOut.Editor
     {
         private const string AssetPath = "Assets/FishOut/Resources/Backdrop/BoardCalibration.asset";
         private const float PanelWidth = 300, HandleRadius = 9;
-        private static readonly string[] PointNames = { "Góc trên trái", "Góc trên phải", "Góc dưới phải", "Góc dưới trái", "Hang 1 (sát đường)", "Hang 2", "Hang 3 (trong hang)" };
+        private static readonly string[] PointNames = { "Góc trên trái", "Góc trên phải", "Góc dưới phải", "Góc dưới trái", "Hang 1 (sát đường)", "Hang 2 (miệng hang)", "Hang 3 (trong hang)", "Hang cuối (khuất sau vòm)" };
         private static string PointName(int i) => i < BoardCalibration.FixedPoints ? PointNames[i] : i == BoardCalibration.FixedPoints ? "Đường 0 (rẽ vào hang)" : "Đường " + (i - BoardCalibration.FixedPoints);
         private static readonly Color RoadColor = new Color(1, .55f, .1f);
 
@@ -236,6 +236,7 @@ namespace FishOut.Editor
             EditorGUILayout.Slider(so.FindProperty("radiusBottomRight"), 0, 3, "Dưới phải");
             EditorGUILayout.Slider(so.FindProperty("radiusBottomLeft"), 0, 3, "Dưới trái");
             EditorGUILayout.Slider(so.FindProperty("edgeOffset"), -.5f, .5f, new GUIContent("Nới / thu viền cắt", "Dương: viền cắt lùi ra ngoài; âm: thu vào trong"));
+            EditorGUILayout.PropertyField(so.FindProperty("checker"), new GUIContent("Hiện ô cờ", "Tắt: mặt bàn cát trơn của nền (lưới ẩn theo spec), vẫn giữ gờ và rãnh quanh bàn"));
             EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("Đường cá bơi", EditorStyles.boldLabel);
             if (!data.customRoad)

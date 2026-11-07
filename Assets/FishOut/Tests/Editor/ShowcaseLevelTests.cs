@@ -110,7 +110,10 @@ namespace FishOut.Tests
             var entry=new Vector2(level.gate.x-1,level.height-.4f);
             float length=0;var route=ConveyorNetwork.RouteToGate(level,entry);
             for(int i=1;i<route.Count;i++)length+=Vector2.Distance(route[i-1],route[i]);
-            Assert.Less(length,5f,"A fish beside the gate must not circle the whole ring");
+            // The neck into the cave (now running on behind the painted arch) is shared by every route; only the ring part varies.
+            var neck=level.channelLines[1];float neckLength=0;
+            for(int i=1;i<neck.Length;i++)neckLength+=Vector2.Distance(neck[i-1],neck[i]);
+            Assert.Less(length-neckLength,4f,"A fish beside the gate must not circle the whole ring");
         }
         [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase(5)]
         public void EntireFishCellFitsInsideCurvedWater(int number)

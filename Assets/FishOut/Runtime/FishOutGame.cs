@@ -183,6 +183,7 @@ namespace FishOut
         }
         // Spec §4: taps are ignored while a fish is moving on the board. Once it has reached the road to the cave,
         // it no longer blocks anything on the board, so the next tap is accepted.
+        private const float CaveSpeed=2f;
         public bool FishMovingOnBoard
         {
             get
@@ -259,13 +260,26 @@ namespace FishOut
             if(result.ChangesBoard){actor.Pop(.12f,.09f);audioPlayer.Play("peel");}
             // One trail per line keeps a long queue readable and cheap.
             var trail=leader&&result.ChangesBoard?world.AttachEffect("Trail",actor.transform):null;
-            var gate=world.Cell(Board.Level.gate);bool entered=false;
+            // On the painted seabed the fish swims through the cave mouth and on behind the arch, which is drawn over it
+            // and darkens the tunnel, so it fades out of sight instead of shrinking away.
+            bool painted=PaintedBackdrop.Warps(Board.Level);
+            var gate=painted?PaintedBackdrop.CaveMouth(Board.Level,.1f):world.Cell(Board.Level.gate);bool entered=false;
+            // Half way into the dark, the fish stops holding up the ones behind it: any overlap is out of sight.
+            float darkZ=painted?Mathf.Lerp(gate.z,PaintedBackdrop.CaveEnd(Board.Level,.1f).z,.3f):float.PositiveInfinity;
             yield return actor.Mover.FollowPath(path,!result.exits,position=>
             {
                 if(!result.exits||position.z<gate.z)return;
-                if(!entered){entered=true;world.PlayEffect("GateBlast",gate);audioPlayer.PlayGate();}
-                // The fish shrinks away over the last cell of the path, inside the cave.
-                actor.transform.localScale=Vector3.one*Mathf.Clamp01(1-(position.z-gate.z));
+                if(position.z>=darkZ)actor.Mover.InCave=true;
+                if(!entered)
+                {
+                    entered=true;audioPlayer.PlayGate();
+                    // On the painting the fish slows down inside the tunnel so it can be seen sinking into the dark;
+                    // the white burst would hide exactly that, so only the old 3D reef keeps it.
+                    if(painted)actor.Mover.maximumSpeed=Mathf.Min(actor.Mover.maximumSpeed,CaveSpeed*Pace());
+                    else world.PlayEffect("GateBlast",gate);
+                }
+                // Without the painted arch, the fish shrinks away over the last cell of the path, inside the cave.
+                if(!painted)actor.transform.localScale=Vector3.one*Mathf.Clamp01(1-(position.z-gate.z));
             });
             if(trail)Destroy(trail);
             swimmers.Remove(actor.Mover);linePredecessor.Remove(actor.Mover);
@@ -390,7 +404,7 @@ namespace FishOut
                 if(!fish.OnRoad){HoldBeforeJoining(fish);continue;}
                 foreach(var other in swimmers)
                 {
-                    if(other==fish||!other.OnRoad)continue;
+                    if(other==fish||!other.OnRoad||other.InCave)continue;
                     bool touching=Touching(fish,other);
                     if(!touching&&!Following(fish,other))continue;
                     // Head on, each is in front of the other; the one nearer the gate goes first.

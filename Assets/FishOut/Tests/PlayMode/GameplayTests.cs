@@ -212,10 +212,11 @@ namespace FishOut.Tests
                 float wait=Time.realtimeSinceStartup+5;while(game.FishMovingOnBoard&&Time.realtimeSinceStartup<wait)yield return null;
                 int id=game.Board.FindEscapingFish();if(id>=0)game.TapFish(id);
             }
-            float deadline=Time.realtimeSinceStartup+6,closest=float.PositiveInfinity;string detail="";
+            float deadline=Time.realtimeSinceStartup+9,closest=float.PositiveInfinity;string detail="";
             while(game.IsBusy&&Time.realtimeSinceStartup<deadline)
             {
-                var road=game.World.actors.Values.Where(a=>a&&a.Mover.OnRoad&&a.Mover.Remaining>1.2f).ToList();
+                // Deep in the painted cave a fish is fading out of sight and may be overtaken.
+                var road=game.World.actors.Values.Where(a=>a&&a.Mover.OnRoad&&!a.Mover.InCave&&a.Mover.Remaining>1.2f).ToList();
                 for(int a=0;a<road.Count;a++)for(int b=a+1;b<road.Count;b++){float gap=Vector3.Distance(road[a].transform.position,road[b].transform.position);if(gap<closest){closest=gap;detail=road[a].Id+" rem="+road[a].Mover.Remaining+" held="+road[a].Mover.Held+" pos="+road[a].transform.position+" fwd="+road[a].transform.forward+" | "+road[b].Id+" rem="+road[b].Mover.Remaining+" held="+road[b].Mover.Held+" pos="+road[b].transform.position+" fwd="+road[b].transform.forward+" t="+Time.realtimeSinceStartup;}}
                 yield return null;
             }

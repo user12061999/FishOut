@@ -14,6 +14,8 @@ namespace FishOut
         // Distance along the path where it joins the shared road; set for fish heading to the gate.
         public float roadStart=float.PositiveInfinity;
         public bool Held { get; set; }
+        // Inside the cave a fish no longer holds up the queue behind it (it is fading out of sight there).
+        public bool InCave { get; set; }
         public float HoldSpeed { get; set; }
         public float Speed { get; private set; }
         public bool OnRoad => IsMoving && travelled>=roadStart;
@@ -33,11 +35,12 @@ namespace FishOut
             try
             {
                 float distance = 0, speed = startSpeed;
-                travelled=0;Held=false;Remaining=path.Length;current=path;
+                travelled=0;Held=false;InCave=false;Remaining=path.Length;current=path;
                 float limit = Mathf.Max(.1f, maximumSpeed), ramp = Mathf.Max(.1f, acceleration);
                 transform.position = path.Sample(0);
                 while (distance < path.Length)
                 {
+                    limit = Mathf.Max(.1f, maximumSpeed);   // may be lowered mid-path, e.g. inside the cave
                     float remaining = path.Length - distance;
                     // Brake only at a blocker, never at intermediate waypoints or the escape edge.
                     float desired = stopAtEnd ? Mathf.Min(limit, Mathf.Sqrt(2 * ramp * remaining)) : limit;

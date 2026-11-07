@@ -30,7 +30,12 @@ namespace FishOut
         private static Vector2 BoardBR => UV(Calibration.bottomRight);
         private static Vector2 BoardBL => UV(Calibration.bottomLeft);
         // Call after the calibration changes.
-        public static void Reload() { forward.Clear(); inverse.Clear(); calibration = null; }
+        public static void Reload()
+        {
+            forward.Clear(); inverse.Clear(); calibration = null;
+            Release(topTexture);
+            topTexture = null; topKey = null;
+        }
         private const float Pitch = 50, ScaleExponent = .85f;
         private static Texture2D texture;
 
@@ -152,10 +157,17 @@ namespace FishOut
             // The loop starts and ends at the turn into the cave, which stays a sharp joint for the neck to leave from.
             var open = new List<Vector2>(loop) { loop[0] };
             ring = ScrewConveyorGeometry.Rounded(open.ToArray(), false, cal.customRoad ? cal.roadRounding : 1.1f);
-            var neck = new List<Vector2> { loop[0] }; neck.AddRange(cave);
+            // On through the mouth to a point hidden behind the painted arch, so a fish swims out of sight.
+            var hidden = ImageToGrid(level, UV(cal.caveHidden));
+            var neck = new List<Vector2> { loop[0] }; neck.AddRange(cave); neck.Add(hidden);
             gate = ScrewConveyorGeometry.Resample(neck, .12f);
-            gateCell = Vector2Int.RoundToInt(cave[cave.Count - 1]);
+            gateCell = Vector2Int.RoundToInt(hidden);
         }
+        // The cave mouth (second cave point) in world space, where a fish starts to sink into the dark.
+        public static Vector3 CaveMouth(LevelData level, float y) => GridToWorld(level, ImageToGrid(level, UV(Calibration.caveNeck[1])), y);
+        // Where a fish ends, hidden behind the painted arch.
+        public static Vector3 CaveEnd(LevelData level, float y) => GridToWorld(level, ImageToGrid(level, UV(Calibration.caveHidden)), y);
+
         // Corners of the road loop in grid units, from the cave turn round the board: hand-drawn or kept a set distance off the board.
         public static Vector2[] RoadCorners(LevelData level)
         {
@@ -196,6 +208,16 @@ namespace FishOut
             // The painted checker is not a regular 6 × 8 grid, so the board's own cells are laid over it.
             var board = new GameObject("Board checker", typeof(MeshFilter), typeof(MeshRenderer));
             board.transform.SetParent(parent, false);
+            var topShader = Resources.Load<Shader>(TopShader);
+            CaveFront(parent, level, topShader, meshes, materials);
+            if (topShader && topShader.isSupported)
+            {
+                // Sand-grained checker with a raised rim and its shadow, all baked into one alpha texture.
+                var topMesh = BoardTopMesh(level); meshes.Add(topMesh); board.GetComponent<MeshFilter>().sharedMesh = topMesh;
+                var top = new Material(topShader) { name = "Board top", mainTexture = BoardTopTexture(level), renderQueue = 2990 };
+                materials.Add(top); Configure(board, top);
+                return quad;
+            }
             var boardMesh = Checkerboard(level); meshes.Add(boardMesh); board.GetComponent<MeshFilter>().sharedMesh = boardMesh;
             var checker = Checker(level.width - 2, level.height - 2); textures.Add(checker);
             var cellsMaterial = new Material(template) { name = "Board checker", color = Color.white, mainTexture = checker, renderQueue = 2040 };
@@ -288,6 +310,155 @@ namespace FishOut
             var mesh = new Mesh { name = "Board checker", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
             mesh.SetVertices(vertices); mesh.SetUVs(0, uv); mesh.SetTriangles(triangles, 0);
             mesh.RecalculateNormals(); mesh.RecalculateBounds(); return mesh;
+        }
+        // ---- Cave front: the painted arch drawn again over the fish --------------------------------------
+        // CaveFront.png is the top strip of the painting (full width, from the top edge) with alpha only on the arch,
+        // the rocks and corals around it, and a darkening ramp inside the tunnel. Drawn after everything, it hides
+        // a fish behind the arch and lets it fade into the dark as it swims deeper.
+        private const string CaveFrontResource = "Backdrop/CaveFront";
+        private static void CaveFront(Transform parent, LevelData level, Shader shader, List<Mesh> meshes, List<Material> materials)
+        {
+            var texture = Resources.Load<Texture2D>(CaveFrontResource);
+            if (!texture || !shader || !shader.isSupported) return;
+            float bottom = texture.height / ImageSize.y * (ImageSize.x / texture.width);
+            var go = new GameObject("Cave front", typeof(MeshFilter), typeof(MeshRenderer));
+            go.transform.SetParent(parent, false);
+            var mesh = new Mesh { name = "Cave front" };
+            mesh.SetVertices(new List<Vector3> { ImageToWorld(level, new Vector2(0, bottom), -.2f), ImageToWorld(level, new Vector2(0, 0), -.2f), ImageToWorld(level, new Vector2(1, 0), -.2f), ImageToWorld(level, new Vector2(1, bottom), -.2f) });
+            mesh.SetUVs(0, new List<Vector2> { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0) });
+            mesh.SetTriangles(new[] { 0, 1, 2, 0, 2, 3 }, 0); mesh.RecalculateNormals(); mesh.RecalculateBounds();
+            meshes.Add(mesh); go.GetComponent<MeshFilter>().sharedMesh = mesh;
+            var material = new Material(shader) { name = "Cave front", mainTexture = texture, renderQueue = 3100 };
+            material.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+            materials.Add(material); Configure(go, material);
+        }
+
+        // ---- Board top: sand checker, raised rim, cast shadow -----------------------------------------
+        private const string TopShader = "Backdrop/BoardTop";
+        private const int TopTexels = 64;                      // texels per cell
+        private const float TopMargin = 1f;                    // cells of shadow room around the cell rect
+        // Matched to the painted board's own edge: a narrow dark crease on the road at the board's foot, a soft
+        // shade around it, and a rounded lighter rim on the board side (all in cells).
+        private const float Crease = .09f, ShadowReach = .26f, ShadowDrop = .04f, Lip = .02f, RimAt = .07f, RimWidth = .05f;
+        private static Texture2D topTexture; private static string topKey;
+        private static void Release(Object asset)
+        {
+            if (!asset) return;
+            if (Application.isPlaying) Object.Destroy(asset); else Object.DestroyImmediate(asset);
+        }
+        private static Rect TopRect(LevelData level)
+        {
+            var c = Cells(level);
+            return Rect.MinMaxRect(c.xMin - TopMargin, c.yMin - TopMargin, c.xMax + TopMargin, c.yMax + TopMargin);
+        }
+        // A plain warped grid over the board and its shadow; the texture's alpha cuts the rounded outline.
+        private static Mesh BoardTopMesh(LevelData level)
+        {
+            var e = TopRect(level); const int columns = 40, rows = 50;
+            var vertices = new List<Vector3>(); var uv = new List<Vector2>(); var triangles = new List<int>();
+            for (int j = 0; j <= rows; j++) for (int i = 0; i <= columns; i++)
+            {
+                var t = new Vector2(i / (float)columns, j / (float)rows);
+                vertices.Add(GridToWorld(level, new Vector2(Mathf.Lerp(e.xMin, e.xMax, t.x), Mathf.Lerp(e.yMin, e.yMax, t.y)), -.03f)); uv.Add(t);
+            }
+            for (int j = 0; j < rows; j++) for (int i = 0; i < columns; i++)
+            {
+                int a = j * (columns + 1) + i, b = a + 1, d = a + columns + 1, f = d + 1;
+                triangles.AddRange(new[] { a, d, b, b, d, f });
+            }
+            var mesh = new Mesh { name = "Board top", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            mesh.SetVertices(vertices); mesh.SetUVs(0, uv); mesh.SetTriangles(triangles, 0);
+            mesh.RecalculateNormals(); mesh.RecalculateBounds(); return mesh;
+        }
+        // Signed distance to the convex outline (negative inside) and the outward normal of the nearest edge.
+        private static float OutlineDistance(Vector2[] a, Vector2[] normal, Vector2 p, out Vector2 nearest)
+        {
+            float best = float.NegativeInfinity; nearest = Vector2.up;
+            for (int k = 0; k < a.Length; k++)
+            {
+                float d = normal[k].x * (p.x - a[k].x) + normal[k].y * (p.y - a[k].y);
+                if (d > best) { best = d; nearest = normal[k]; }
+            }
+            return best;
+        }
+        private static float Hash(int x, int y) { unchecked { uint h = (uint)(x * 374761393 + y * 668265263); h = (h ^ (h >> 13)) * 1274126177u; return (h ^ (h >> 16)) / 4294967295f; } }
+        private static float Noise(Vector2 p)
+        {
+            int x = Mathf.FloorToInt(p.x), y = Mathf.FloorToInt(p.y); float fx = p.x - x, fy = p.y - y;
+            fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+            return Mathf.Lerp(Mathf.Lerp(Hash(x, y), Hash(x + 1, y), fx), Mathf.Lerp(Hash(x, y + 1), Hash(x + 1, y + 1), fx), fy);
+        }
+        // Baked once per calibration: sand-grained checker, a lit top-left / shaded bottom-right bevel, a thin lip,
+        // and a soft shadow on the painted sand that falls towards the camera, so the board seems to rise from the sand.
+        private static Texture2D BoardTopTexture(LevelData level)
+        {
+            var cal = Calibration;
+            string key = level.width + "x" + level.height + "|" + cal.topLeft + cal.topRight + cal.bottomRight + cal.bottomLeft + "|" + cal.radiusTopLeft + "," + cal.radiusTopRight + "," + cal.radiusBottomRight + "," + cal.radiusBottomLeft + "," + cal.edgeOffset + "," + cal.checker;
+            if (topTexture && topKey == key) return topTexture;
+            Release(topTexture);
+            var outline = OutlineGrid(level).ToArray(); int n = outline.Length; float area = 0;
+            for (int k = 0; k < n; k++) { var p0 = outline[k]; var p1 = outline[(k + 1) % n]; area += p0.x * p1.y - p1.x * p0.y; }
+            var normals = new Vector2[n];
+            for (int k = 0; k < n; k++)
+            {
+                var edge = outline[(k + 1) % n] - outline[k];
+                var outward = area > 0 ? new Vector2(edge.y, -edge.x) : new Vector2(-edge.y, edge.x);
+                normals[k] = outward.sqrMagnitude > 1e-10f ? outward.normalized : Vector2.up;
+            }
+            var c = Cells(level); var e = TopRect(level);
+            float cellW = c.width / (level.width - 2), cellH = c.height / (level.height - 2);
+            int w = Mathf.CeilToInt(e.width / cellW * TopTexels), h = Mathf.CeilToInt(e.height / cellH * TopTexels);
+            float texel = e.width / w;
+            // Tones measured on the painted checker (light 254,227,160 / dark 252,212,132).
+            var light = new Color(254 / 255f, 227 / 255f, 160 / 255f); var dark = new Color(252 / 255f, 212 / 255f, 132 / 255f);
+            var shadowColor = new Color(.94f, .59f, .20f);   // over the road sand this gives the painted crease tone
+            var lightDirection = new Vector2(-.35f, 1).normalized;
+            var pixels = new Color32[w * h];
+            for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
+            {
+                var g = new Vector2(e.xMin + (x + .5f) * e.width / w, e.yMin + (y + .5f) * e.height / h);
+                float d = OutlineDistance(outline, normals, g, out var normal);
+                if (d > ShadowReach + ShadowDrop + .02f) { pixels[y * w + x] = default; continue; }
+                // Shadow on the sand: an even contact shade plus a drop towards the bottom of the screen.
+                var outside = new Color(shadowColor.r, shadowColor.g, shadowColor.b, 0);
+                if (d > -texel)
+                {
+                    float drop = OutlineDistance(outline, normals, g + new Vector2(0, ShadowDrop), out _);
+                    outside.a = Mathf.Max(.55f * (1 - Mathf.SmoothStep(0, Crease, Mathf.Max(0, d))), .16f * (1 - Mathf.SmoothStep(0, ShadowReach, Mathf.Max(0, drop))));
+                }
+                Color top = default; float cover = Mathf.Clamp01(-d / texel + .5f);
+                if (cover > 0 && !cal.checker)
+                {
+                    // Plain board: only the raised rim is drawn over the painted sand.
+                    float inside = -d;
+                    float rim = Mathf.Exp(-Mathf.Pow((inside - RimAt) / RimWidth, 2)) * (.6f + .4f * Mathf.Max(0, Vector2.Dot(normal, lightDirection)));
+                    float lip = inside < Lip ? 1 - inside / Lip : 0;
+                    var rimColour = lip > rim ? new Color(.62f, .40f, .14f, .35f * lip) : new Color(1, .98f, .9f, .32f * rim);
+                    pixels[y * w + x] = Color.Lerp(outside, rimColour, cover);
+                    continue;
+                }
+                if (cover > 0)
+                {
+                    int cx = Mathf.FloorToInt((g.x - c.xMin) / cellW), cy = Mathf.FloorToInt((g.y - c.yMin) / cellH);
+                    top = ((cx + cy) & 1) == 0 ? light : dark;
+                    // Fine sand grain and a few darker specks, like the painted sand around the board.
+                    float grain = .55f * Noise(g * 9f) + .30f * Noise(g * 23f) + .15f * Noise(g * 57f);
+                    float tone = 1 + (grain - .5f) * .045f;
+                    if (Hash(Mathf.FloorToInt(g.x * 40), Mathf.FloorToInt(g.y * 40)) > .996f) tone *= .965f;
+                    top *= tone;
+                    float inside = -d;
+                    // Rounded rim: a light band just inside the edge, a touch stronger where it faces the light.
+                    float rim = Mathf.Exp(-Mathf.Pow((inside - RimAt) / RimWidth, 2));
+                    top *= 1 + rim * (.09f + .05f * Vector2.Dot(normal, lightDirection));
+                    if (inside < Lip) top *= Mathf.Lerp(.90f, 1, inside / Lip);
+                    top.a = 1;
+                }
+                var colour = Color.Lerp(outside, top, cover);
+                pixels[y * w + x] = colour;
+            }
+            topTexture = new Texture2D(w, h, TextureFormat.RGBA32, false) { name = "Board top", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear, anisoLevel = 4 };
+            topTexture.SetPixels32(pixels); topTexture.Apply(false, true); topKey = key;
+            return topTexture;
         }
         // Two sand tones sampled from the painting's checker.
         private static Texture2D Checker(int columns, int rows)
