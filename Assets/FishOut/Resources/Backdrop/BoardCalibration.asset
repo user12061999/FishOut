@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd19bdf8cc6bf9e469475351666b7114, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishOut.Runtime::FishOut.BoardCalibration
-  topLeft: {x: 274.8, y: 346.3}
-  topRight: {x: 917.2, y: 445.3}
-  bottomRight: {x: 834.2, y: 1443.8}
-  bottomLeft: {x: -17.8, y: 1268}
-  radiusTopLeft: 1.725
+  topLeft: {x: 279.9, y: 363.2}
+  topRight: {x: 912.3, y: 447.4}
+  bottomRight: {x: 845.8, y: 1447.7}
+  bottomLeft: {x: -23, y: 1277.8}
+  radiusTopLeft: 1.48
   radiusTopRight: 1.175
-  radiusBottomRight: 1.175
+  radiusBottomRight: 1.42
   radiusBottomLeft: 1.5
   checker: 1
   edgeOffset: 0
@@ -26,10 +26,10 @@ MonoBehaviour:
   roadBottom: 0.41
   roadTop: 0.32
   caveNeck:
-  - {x: 625.8, y: 284.2}
+  - {x: 606.4, y: 268.6}
   - {x: 635.2, y: 200.6}
-  - {x: 639.9, y: 142.1}
-  caveHidden: {x: 643, y: 40}
+  - {x: 655.2, y: 132.7}
+  caveHidden: {x: 677.4, y: 29.3}
   customRoad: 0
   roadPoints:
   - {x: 609.3338, y: 368.46442}

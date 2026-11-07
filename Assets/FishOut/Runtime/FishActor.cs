@@ -13,6 +13,8 @@ namespace FishOut
         // Idle "nudge": every couple of seconds the fish twitches towards the way it faces, so its heading reads
         // even from behind. Each fish has its own rhythm so the school never pulses in step.
         private const float NudgeAmount=.11f,NudgeLength=.34f,NudgeTilt=9f;
+        // Heading cues (idle nudge + teardrop shadow) are switched off for now at the designer's request (07/11).
+        public static bool HeadingCues=false;
         private float nudgePeriod,nudgePhase;
         private float popLeft,popLength,popSize;
         public void Configure(int id, Transform visual, Material glow)
@@ -46,7 +48,7 @@ namespace FishOut
             if(Visual)
             {
                 float lunge=0;
-                if(Mover&&!Mover.IsMoving)
+                if(HeadingCues&&Mover&&!Mover.IsMoving)
                 {
                     float t=Mathf.Repeat(Time.time+nudgePhase,nudgePeriod);
                     if(t<NudgeLength){float k=t/NudgeLength;lunge=Mathf.Sin(k*Mathf.PI)*(1-.35f*k);}

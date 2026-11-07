@@ -340,7 +340,7 @@ namespace FishOut
         private const float TopMargin = 1f;                    // cells of shadow room around the cell rect
         // Matched to the painted board's own edge: a narrow dark crease on the road at the board's foot, a soft
         // shade around it, and a rounded lighter rim on the board side (all in cells).
-        private const float Crease = .09f, ShadowReach = .26f, ShadowDrop = .04f, Lip = .02f, RimAt = .07f, RimWidth = .05f;
+        private const float Crease = .07f, ShadowReach = .24f, ShadowDrop = .05f, Lip = .02f, RimAt = .07f, RimWidth = .05f;
         private static Texture2D topTexture; private static string topKey;
         private static void Release(Object asset)
         {
@@ -382,6 +382,8 @@ namespace FishOut
             }
             return best;
         }
+        // GLSL-style smoothstep (Mathf.SmoothStep interpolates between its first two arguments instead).
+        private static float Smooth(float edge0, float edge1, float x) { float t = Mathf.Clamp01((x - edge0) / (edge1 - edge0)); return t * t * (3 - 2 * t); }
         private static float Hash(int x, int y) { unchecked { uint h = (uint)(x * 374761393 + y * 668265263); h = (h ^ (h >> 13)) * 1274126177u; return (h ^ (h >> 16)) / 4294967295f; } }
         private static float Noise(Vector2 p)
         {
@@ -442,7 +444,7 @@ namespace FishOut
                 if (d > -texel)
                 {
                     float drop = OutlineDistance(outline, normals, g + new Vector2(0, ShadowDrop), out _);
-                    outside.a = Mathf.Max(.55f * (1 - Mathf.SmoothStep(0, Crease, Mathf.Max(0, d))), .16f * (1 - Mathf.SmoothStep(0, ShadowReach, Mathf.Max(0, drop))));
+                    outside.a = Mathf.Max(.5f * (1 - Smooth(0, Crease, d)), .14f * (1 - Smooth(0, ShadowReach, drop)));
                 }
                 Color top = default; float cover = Mathf.Clamp01(-d / texel + .5f);
                 if (cover > 0 && !cal.checker)

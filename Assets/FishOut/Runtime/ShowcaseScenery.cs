@@ -156,7 +156,8 @@ namespace FishOut
             {
                 var p=new Vector2((x+.5f)/size-.5f,(y+.5f)/size-.5f);
                 float d;
-                if(p.y>=head)d=Vector2.Distance(p,new Vector2(0,head))-radius;
+                if(!FishActor.HeadingCues)d=(p.magnitude*2f-.65f)*soft;   // the old soft round shadow while the heading cues are off
+                else if(p.y>=head)d=Vector2.Distance(p,new Vector2(0,head))-radius;
                 else{float k=Mathf.Clamp01((p.y-tail)/(head-tail));d=Mathf.Max(Mathf.Abs(p.x)-radius*Mathf.Pow(k,.75f),tail-p.y);}
                 float alpha=Mathf.Clamp01(-d/soft+.35f);
                 pixels[y*size+x]=new Color32(92,58,24,(byte)(alpha*alpha*(3-2*alpha)*150));

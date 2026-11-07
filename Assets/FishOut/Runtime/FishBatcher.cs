@@ -46,6 +46,11 @@ namespace FishOut
         private static Matrix4x4 ShadowMatrix(Transform owner)
         {
             float size=ShadowSize*owner.lossyScale.x;
+            if(!FishActor.HeadingCues)
+            {
+                var flat=owner.position;flat.y=ShadowHeight;
+                return Matrix4x4.TRS(flat,Quaternion.Euler(90,0,0),Vector3.one*size);
+            }
             var forward=owner.forward;forward.y=0;if(forward.sqrMagnitude<1e-6f)forward=Vector3.forward;forward.Normalize();
             var position=owner.position-forward*(ShadowBack*size);position.y=ShadowHeight;
             return Matrix4x4.TRS(position,Quaternion.LookRotation(forward)*Quaternion.Euler(90,0,0),new Vector3(size,size*ShadowLength,1));
