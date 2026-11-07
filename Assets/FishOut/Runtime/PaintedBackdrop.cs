@@ -399,7 +399,7 @@ namespace FishOut
             // painting's own rim and crease are left to show; otherwise the rim and shadow are drawn here.
             var mask = Resources.Load<Texture2D>(BoardMaskResource);
             bool masked = mask && mask.isReadable;
-            string key = level.width + "x" + level.height + "|" + cal.topLeft + cal.topRight + cal.bottomRight + cal.bottomLeft + "|" + cal.radiusTopLeft + "," + cal.radiusTopRight + "," + cal.radiusBottomRight + "," + cal.radiusBottomLeft + "," + cal.edgeOffset + "," + cal.checker + "," + masked;
+            string key = level.width + "x" + level.height + "|" + cal.topLeft + cal.topRight + cal.bottomRight + cal.bottomLeft + "|" + cal.radiusTopLeft + "," + cal.radiusTopRight + "," + cal.radiusBottomRight + "," + cal.radiusBottomLeft + "," + cal.edgeOffset + "," + cal.checker + "," + (masked ? mask.GetInstanceID() + ":" + mask.updateCount : "none");
             if (topTexture && topKey == key) return topTexture;
             Release(topTexture);
             var outline = OutlineGrid(level).ToArray(); int n = outline.Length; float area = 0;
