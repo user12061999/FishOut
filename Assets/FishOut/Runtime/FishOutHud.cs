@@ -205,8 +205,10 @@ namespace FishOut
             {
                 // GUI Pro popup: blue card with the ribbon title riding over its top edge.
                 card.sprite=skin.popup;card.color=Color.white;
-                Icon(panel,"Title ribbon",skin.ribbon,Color.white,new Vector2(.5f,.97f),1).rectTransform.sizeDelta=new Vector2(760,200);
-                Label(panel,title,new Vector2(.5f,.985f),new Vector2(560,110),50,Color.white);
+                // The ribbon is sliced down its middle: the centre plate stretches to fit the title, the tails keep their shape.
+                var ribbonImage=Icon(panel,"Title ribbon",skin.ribbon,Color.white,new Vector2(.5f,.975f),1);
+                ribbonImage.type=Image.Type.Sliced;ribbonImage.rectTransform.sizeDelta=new Vector2(820,150);
+                Label(panel,title,new Vector2(.5f,.985f),new Vector2(520,100),46,Color.white);
             }
             else
             {
