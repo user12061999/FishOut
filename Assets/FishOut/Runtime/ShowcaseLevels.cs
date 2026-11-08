@@ -16,8 +16,10 @@ namespace FishOut
         // Fish, rocks, crabs, fish facing a crab (only the free Rescue frees it), waves, two models.
         private static readonly SpecStage[] Spec=
         {
-            new SpecStage(3,0,0,0,1,0,2),new SpecStage(10,0,0,0,3,2,5),new SpecStage(20,3,0,0,4,0,8),
-            new SpecStage(20,0,1,1,4,5,0),new SpecStage(20,2,2,1,5,8,5)
+            // Models: 0 fish blue, 1 fish grey, 2 fish orange, 3-5 turtles, 6-8 octopus. The purple octopus (8) was swapped
+            // for the grey fish (1) on 08/11: seen from above its symmetric body did not show which way it faces.
+            new SpecStage(3,0,0,0,1,0,2),new SpecStage(10,0,0,0,3,2,5),new SpecStage(20,3,0,0,4,0,1),
+            new SpecStage(20,0,1,1,4,5,0),new SpecStage(20,2,2,1,5,1,5)
         };
         public const int SpecCount=5;
         public const int SpecWidth=8,SpecHeight=10;
