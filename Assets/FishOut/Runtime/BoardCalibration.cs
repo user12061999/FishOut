@@ -26,6 +26,8 @@ namespace FishOut
         [Tooltip("Where a fish ends, deep in the cave behind the arch (pixels). The second cave point is the cave mouth.")]
         public Vector2 caveHidden = new Vector2(643f, 40f);
 
+        [Tooltip("Swimming speed on the sand road after leaving the board, as a share of the speed on the board.")]
+        [Range(.2f, 1f)] public float roadSpeed = .55f;
         [Tooltip("Draw the fish road by hand instead of keeping it a fixed distance around the board.")]
         public bool customRoad;
         [Tooltip("Hand-drawn road loop in pixels, in swimming order. Point 0 is where the road turns up into the cave.")]

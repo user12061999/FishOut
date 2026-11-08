@@ -254,6 +254,7 @@ namespace FishOut.Editor
                 EditorGUILayout.Slider(so.FindProperty("roadTop"), 0, 2, "Cách mép trên (ô)");
             }
             else EditorGUILayout.Slider(so.FindProperty("roadRounding"), 0, 3, "Độ bo khúc cua (ô)");
+            EditorGUILayout.Slider(so.FindProperty("roadSpeed"), .2f, 1f, new GUIContent("Tốc độ bơi trên đường", "So với tốc độ trên bàn: 1 = như cũ, 0,5 = chậm một nửa"));
             if (so.ApplyModifiedProperties()) Changed();
             bool custom = EditorGUILayout.ToggleLeft("Tự vẽ đường (kéo từng điểm cam)", data.customRoad);
             if (custom != data.customRoad)

@@ -268,6 +268,9 @@ namespace FishOut
             float darkZ=painted?Mathf.Lerp(gate.z,PaintedBackdrop.CaveEnd(Board.Level,.1f).z,.3f):float.PositiveInfinity;
             yield return actor.Mover.FollowPath(path,!result.exits,position=>
             {
+                // Once off the board the fish cruises along the sand road at the calibrated, slower speed.
+                if(result.exits&&!entered&&actor.Mover.OnRoad)
+                    actor.Mover.maximumSpeed=Mathf.Min(actor.Mover.maximumSpeed,12f*pace*PaintedBackdrop.Calibration.roadSpeed);
                 if(!result.exits||position.z<gate.z)return;
                 if(position.z>=darkZ)actor.Mover.InCave=true;
                 if(!entered)
