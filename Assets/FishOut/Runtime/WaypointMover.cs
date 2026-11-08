@@ -8,6 +8,8 @@ namespace FishOut
     {
         [Min(.1f)] public float maximumSpeed = 12f;
         [Min(.1f)] public float acceleration = 48f;
+        // How fast a fish sheds speed when its limit drops mid-path (road, cave); braking at a blocker keeps the full rate.
+        public float easeDown = float.PositiveInfinity;
         public bool IsMoving { get; private set; }
         public float startSpeed;
         public bool orientAlongPath;
@@ -45,7 +47,7 @@ namespace FishOut
                     // Brake only at a blocker, never at intermediate waypoints or the escape edge.
                     float desired = stopAtEnd ? Mathf.Min(limit, Mathf.Sqrt(2 * ramp * remaining)) : limit;
                     // A queueing fish eases down to the speed of the one ahead, and stops dead only on contact.
-                    if (!Held) speed = Mathf.MoveTowards(speed, desired, ramp * Time.deltaTime);
+                    if (!Held) speed = Mathf.MoveTowards(speed, desired, (speed > desired && !stopAtEnd ? Mathf.Min(ramp, easeDown) : ramp) * Time.deltaTime);
                     else speed = HoldSpeed <= 0 ? 0 : Mathf.MoveTowards(speed, Mathf.Min(desired, HoldSpeed), ramp * QueueBrake * Time.deltaTime);
                     Speed = speed;
                     distance = Mathf.Min(path.Length, distance + speed * Time.deltaTime);

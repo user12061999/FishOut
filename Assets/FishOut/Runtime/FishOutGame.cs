@@ -227,7 +227,7 @@ namespace FishOut
             var step=BoardState.Direction(Board.Find(id).facing);var vector=new Vector3(step.x,0,step.y);
             audioPlayer.Play("buffer");world.PlayEffect("Bump",rest+vector*.45f);actor.Dizzy();
             var blocker=Board.BlockerOf(id);
-            if(blocker!=null&&world.actors.TryGetValue(blocker.id,out var other)&&other)other.Pop(.15f,.15f);
+            if(blocker!=null&&world.actors.TryGetValue(blocker.id,out var other)&&other)other.Jolt(vector);
             for(float t=0;t<.14f;t+=Time.deltaTime){actor.transform.position=rest+vector*Mathf.Sin(t/.14f*Mathf.PI)*.22f;yield return null;}
             actor.transform.position=rest;moving.Remove(id);ResolveBoard();
         }
@@ -254,9 +254,11 @@ namespace FishOut
             var end=path.End;
             // Speed follows the zoom so fish look equally fast on every board.
             float pace=Pace();
-            actor.Mover.maximumSpeed=(result.exits?12f:7f)*pace;
+            actor.Mover.maximumSpeed=(result.exits?12f:7f)*pace*PaintedBackdrop.Calibration.boardSpeed;
             actor.Mover.startSpeed=result.exits?5f:3f;
             actor.Mover.acceleration=result.exits?96f:72f;
+            // An escaping fish eases into the slower road and cave speeds instead of braking hard, so the queue behind it never jolts.
+            actor.Mover.easeDown=result.exits&&SmoothQueue?9f*pace:float.PositiveInfinity;
             if(result.ChangesBoard){actor.Pop(.12f,.09f);audioPlayer.Play("peel");}
             // One trail per line keeps a long queue readable and cheap.
             var trail=leader&&result.ChangesBoard?world.AttachEffect("Trail",actor.transform):null;
@@ -293,6 +295,9 @@ namespace FishOut
                 for(float t=0;t<.18f;t+=Time.deltaTime){actor.transform.position=end+vector*Mathf.Sin(t/.18f*Mathf.PI)*.07f;yield return null;}
                 actor.transform.position=end;actor.SetSwimming(false);audioPlayer.Play(result.hitsCrab?"reject":"land");
                 world.PlayEffect(result.hitsCrab?"CrabHit":"Bump",end);actor.Dizzy();
+                // The fish it ran into is knocked a little and shakes it off.
+                var struck=Board.BlockerOf(id);
+                if(struck!=null&&world.actors.TryGetValue(struck.id,out var hit)&&hit)hit.Jolt(vector);
             }
             if(result.hitsCrab){hud.Hazard();hud.Toast("CRAB!  -1 LIFE");if(vibration)Handheld.Vibrate();}
             if(CurrentLevel==2&&id==stopLessonFish&&!result.exits)hud.instructions.text="Fish stay where they stop. Clear a path, then tap again.";
@@ -414,6 +419,29 @@ namespace FishOut
                     if((Touching(other,fish)||Following(other,fish))&&other.Remaining>fish.Remaining)continue;
                     fish.Held=true;fish.HoldSpeed=Mathf.Min(fish.HoldSpeed,touching?0:other.Speed);
                 }
+                if(SmoothQueue)FollowLikeTraffic(fish);
+            }
+        }
+        // The school stretches and squeezes like traffic instead of stopping and starting: a fish matches the speed of
+        // the one ahead on the road and closes or opens the gap gently, so it slows down long before it would touch.
+        // Off = the old stop-and-go queue, kept for side-by-side comparison.
+        public static bool SmoothQueue=true;
+        private const float FollowRange=2.6f,FollowGap=1f,FollowGain=2.4f,FollowRadius=.9f;
+        private void FollowLikeTraffic(WaypointMover fish)
+        {
+            float cell=PaintedBackdrop.CellWorldSize(fish.transform.position);
+            foreach(var other in swimmers)
+            {
+                if(other==fish||!other.OnRoad||other.InCave||other.Remaining>=fish.Remaining)continue;
+                float gap=fish.Remaining-other.Remaining;
+                if(gap>FollowRange*cell)continue;
+                // A fish on this one's route counts, and so does one right beside it where two roads merge;
+                // a fish on a road that only merges in later does not.
+                bool onRoute=Vector3.Distance(fish.PointAhead(gap),other.transform.position)<FollowRadius*cell;
+                bool merging=Vector3.Distance(fish.transform.position,other.transform.position)<FollowGap*cell;
+                if(!onRoute&&!merging)continue;
+                float speed=Mathf.Max(0,other.Speed+FollowGain*(gap-FollowGap*cell));
+                if(speed<fish.HoldSpeed){fish.Held=true;fish.HoldSpeed=speed;}
             }
         }
         // A fish already on the road has the right of way: one about to join waits at the edge

@@ -22,6 +22,8 @@ namespace FishOut
         private Coroutine dizzy;
         private float wobble;
         private float popLeft,popLength,popSize;
+        private const float PaddleBeat=9f,PaddleYaw=11f,PaddleDrift=.035f,PaddleBob=.03f;
+        private float paddleWeight;
         public void Configure(int id, Transform visual, Material glow)
         {
             Id=id; Visual=visual; resting=visual.localPosition; restingScale=visual.localScale; restingRotation=visual.localRotation;
@@ -35,6 +37,14 @@ namespace FishOut
             halo.enabled=false;
         }
         public void Pop(float size,float seconds){popSize=size;popLength=popLeft=seconds;}
+        // Hit from behind or the side by another fish: knocked a little along the hit and shaking it off.
+        private const float JoltLength=.38f,JoltPush=.1f,JoltShake=13f,JoltBeat=42f;
+        private Vector3 joltDirection;private float joltLeft;
+        public void Jolt(Vector3 worldDirection)
+        {
+            joltDirection=worldDirection.sqrMagnitude>.0001f?worldDirection.normalized:Vector3.zero;
+            joltLeft=JoltLength;Pop(.1f,.2f);
+        }
         public void Dizzy(float seconds=.9f)
         {
             if(!isActiveAndEnabled||!Visual)return;
@@ -101,9 +111,23 @@ namespace FishOut
                     float t=Mathf.Repeat(Time.time+nudgePhase,nudgePeriod);
                     if(t<NudgeLength){float k=t/NudgeLength;lunge=Mathf.Sin(k*Mathf.PI)*(1-.35f*k);}
                 }
+                // Waiting in the queue the fish keeps paddling on the spot: tail sway, a little side to side and a livelier
+                // bob, fading in as it slows below half its cruising speed, so a slow school still reads as swimming.
+                float paddle=0;
+                if(Mover&&Mover.IsMoving&&Mover.maximumSpeed>.1f)paddle=1-Mathf.Clamp01(Mover.Speed/(Mover.maximumSpeed*.5f));
+                paddleWeight=Mathf.MoveTowards(paddleWeight,paddle,Time.deltaTime*4f);
+                float beat=Time.time*PaddleBeat+Id*1.7f;
+                float sway=Mathf.Sin(beat)*PaddleYaw*paddleWeight,drift=Mathf.Sin(beat*.5f)*PaddleDrift*paddleWeight,bob=Mathf.Abs(Mathf.Sin(beat))*PaddleBob*paddleWeight;
                 var shift=PaintedBackdrop.Current!=null?transform.InverseTransformVector(PaintedBackdrop.PieceShift(transform.position)):Vector3.zero;
-                Visual.localPosition=resting+shift+Vector3.up*(Mathf.Sin(Time.time*2.8f+Id)*.025f)+Vector3.forward*(lunge*NudgeAmount);
-                Visual.localRotation=Quaternion.Euler(lunge*NudgeTilt,0,wobble)*restingRotation;
+                Vector3 knock=Vector3.zero;float shake=0;
+                if(joltLeft>0)
+                {
+                    joltLeft-=Time.deltaTime;float k=1-Mathf.Clamp01(joltLeft/JoltLength);
+                    knock=transform.InverseTransformDirection(joltDirection)*Mathf.Sin(Mathf.Min(1,k*2.5f)*Mathf.PI)*JoltPush/Mathf.Max(.01f,transform.lossyScale.x);
+                    shake=Mathf.Sin(k*JoltBeat)*JoltShake*(1-k);
+                }
+                Visual.localPosition=resting+shift+Vector3.up*(Mathf.Sin(Time.time*2.8f+Id)*.025f+bob)+Vector3.forward*(lunge*NudgeAmount)+Vector3.right*drift+knock;
+                Visual.localRotation=Quaternion.Euler(lunge*NudgeTilt,sway+shake,wobble)*restingRotation;
             }
             // Smaller further up the painted board, growing as it swims towards the camera.
             if(PaintedBackdrop.Current!=null) transform.localScale=Vector3.one*PaintedBackdrop.ScaleAt(transform.position);

@@ -32,6 +32,8 @@ MonoBehaviour:
   - {x: 635.2, y: 200.6}
   - {x: 655.2, y: 132.7}
   caveHidden: {x: 677.4, y: 29.3}
+  boardSpeed: 0.7
+  roadSpeed: 0.7
   customRoad: 0
   roadPoints:
   - {x: 609.3338, y: 368.46442}
