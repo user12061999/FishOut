@@ -7,28 +7,25 @@ namespace FishOut.Tests
 {
     public class ShowcaseLevelTests
     {
-        // Clears a stage the way a careful player would: free fish first, the free Rescue only for a fish facing a crab.
+        // Clears a stage the way a careful player would: only taps that send a piece (fish or crab) out, no booster.
         internal static void ClearStage(BoardState board,System.Action<int> onEscape=null)
         {
             for(int guard=0;guard<1000&&!board.IsClear;guard++)
             {
                 int id=board.FindEscapingFish();
                 if(id>=0){onEscape?.Invoke(id);Assert.IsTrue(board.Move(id).exits);continue;}
-                Assert.IsFalse(board.RescueUsed,"Stuck after the free Rescue at level "+board.Level.number);
-                var trapped=board.Fish.FirstOrDefault(f=>board.Preview(f.id).hitsCrab);
-                Assert.IsNotNull(trapped,"School is deadlocked at level "+board.Level.number);
-                Assert.IsTrue(board.Rescue(trapped.id));
+                Assert.Fail("No piece can leave without a booster at level "+board.Level.number);
             }
             Assert.IsTrue(board.IsClear,"Stage did not finish");
         }
         // GDD §8: fish, rocks, crabs per stage.
         [TestCase(1,3,0,0)] [TestCase(2,10,0,0)] [TestCase(3,20,3,0)] [TestCase(4,20,0,1)] [TestCase(5,20,2,2)]
-        public void SpecStageIsSolvableWithoutLosingALife(int number,int fish,int rocks,int crabs)
+        public void SpecStageIsSolvableWithoutBumpingACrab(int number,int fish,int rocks,int crabs)
         {
-            var level=FishOutLevels.Get(number);var board=new BoardState(level);
-            Assert.AreEqual(fish,board.Fish.Count);Assert.IsTrue(level.showcase);
+            var level=FishOutLevels.Get(number);var board=new BoardState(level);Assert.IsFalse(board.NoWayOut,"Every stage starts solvable");
+            Assert.AreEqual(fish,board.Fish.Count(f=>!f.crab));Assert.IsTrue(level.showcase);
             Assert.AreEqual(rocks,level.obstacles.FindAll(o=>o.kind==ObstacleKind.Rock).Count);
-            Assert.AreEqual(crabs,level.obstacles.FindAll(o=>o.kind==ObstacleKind.Crab).Count);
+            Assert.AreEqual(crabs,level.fish.FindAll(f=>f.crab).Count);Assert.IsFalse(level.obstacles.Exists(o=>o.kind==ObstacleKind.Crab));
             Assert.AreEqual(8,level.width);Assert.AreEqual(10,level.height);
             var checkedEntries=new HashSet<Vector2Int>();
             ClearStage(board,id=>
@@ -39,7 +36,7 @@ namespace FishOut.Tests
                 Assert.Less(Vector2.Distance(level.gate,route[route.Count-1]),.75f,"The road must end in the cave");
                 for(int i=1;i<route.Count;i++)Assert.Less(Vector2.Distance(route[i],route[i-1]),.25f,"Conveyor curve has a discontinuity");
             });
-            Assert.AreEqual(3,board.Lives);Assert.AreEqual(crabs>0,board.RescueUsed);
+            Assert.IsFalse(board.IsFailed);Assert.IsFalse(board.RescueUsed);
         }
         [Test]
         public void TutorialStagesTeachTheirLesson()
@@ -51,7 +48,8 @@ namespace FishOut.Tests
             foreach(var n in new[]{4,5})
             {
                 var b=new BoardState(FishOutLevels.Get(n));
-                Assert.AreEqual(1,b.Fish.Count(f=>b.Preview(f.id).hitsCrab),"Level "+n+": one fish faces a crab");
+                Assert.IsTrue(b.Fish.Any(f=>!f.crab&&b.Preview(f.id).hitsCrab),"Level "+n+": a fish can bump a crab");
+                Assert.IsFalse(b.Fish.Any(f=>f.crab&&b.Preview(f.id).exits),"Level "+n+": no crab can leave on the first tap");
             }
         }
         private static LevelData Lined(params FishData[] fish)
@@ -100,7 +98,7 @@ namespace FishOut.Tests
         public void EveryStageUsesAtMostTwoCharacterModels(int number)
         {
             var models=new HashSet<int>();
-            foreach(var fish in FishOutLevels.Get(number).fish)models.Add(fish.appearance);
+            foreach(var fish in FishOutLevels.Get(number).fish)if(!fish.crab)models.Add(fish.appearance);
             Assert.LessOrEqual(models.Count,2);
         }
         [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase(5)]

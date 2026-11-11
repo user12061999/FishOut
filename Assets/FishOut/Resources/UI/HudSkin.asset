@@ -34,7 +34,7 @@ MonoBehaviour:
   toggleBg: {fileID: 21300000, guid: 6811196040b84412ea2ffd2686edae8e, type: 3}
   toggleCheck: {fileID: 21300000, guid: 6b557df3ef5e446ae9cff8ab68c0f848, type: 3}
   claimButton: {fileID: 21300000, guid: 83474942a109b4cdbb4726b7ee33120f, type: 3}
-  coin: {fileID: 21300000, guid: cb9ac5c430df5468c8ecf26434823ecb, type: 3}
+  coin: {fileID: 21300000, guid: 060bd1765ab501f47abb2cd4543125f6, type: 3}
   tutorialHand: {fileID: 21300000, guid: 9c6e15a101b29468e9d95b7163919130, type: 3}
   whiteTile: {fileID: 21300000, guid: 048495ad29a2f46abbb73dea09cd98a7, type: 3}
   whitePill: {fileID: 21300000, guid: 3eba92f7629b145ae9366b196000a3f3, type: 3}

@@ -37,7 +37,9 @@ namespace FishOut.Editor
             skin.toggleBg = Load("Button/Button01_s_DarkGray.png");
             skin.toggleCheck = Load("UI_Etc/Toggle_Check_Single_Icon.png");
             skin.claimButton = Load("Button/Button01_l_Purple.png");
-            skin.coin = Load("Icon_ItemIcons/256/ItemIcon_Money_Coin.Png");
+            // Partner-supplied fish coin (2026-11-11), replaces the pack's generic coin.
+            skin.coin = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/FishOut/Art/UI/Coin_Fish.png");
+            if (!skin.coin) Debug.LogWarning("Fish Out: missing Assets/FishOut/Art/UI/Coin_Fish.png");
             skin.tutorialHand = Load("Icon_TutorialHand/512/tutorial_hand_3.png");
             skin.whiteTile = Load("Button/Button_Round02_White_Bg.png");
             skin.whitePill = Load("Button/Button01_l_White_Bg.png");

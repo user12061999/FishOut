@@ -153,7 +153,7 @@ namespace FishOut
                 case 1: hud.instructions.text="Tap a fish to send it to the cave.";tutorialTarget=NearestEscaping();break;
                 case 2: hud.instructions.text="Tap it. Fish stop at other fish.";tutorialTarget=stopLessonFish=FindStoppingFish();lessonActive=true;break;
                 case 3: hud.instructions.text="Rocks never move. Plan around them.";break;
-                case 4: hud.instructions.text="Every crab bump costs a life!";break;
+                case 4: hud.instructions.text="Send crabs out too, before 3 bumps!";break;
                 case 5: hud.instructions.text="Mind the rocks and the crabs!";break;
                 default:hud.instructions.text="Lead every fish to the cave.";break;
             }
@@ -212,14 +212,14 @@ namespace FishOut
             if(!playing||locked||settings||hud.modal||Board.IsFailed||Board.IsClear||Board.Find(id)==null||moving.Contains(id)||FishMovingOnBoard)return;
             if(selectingRescue){StartCoroutine(RescueFish(id));return;}
             var move=Board.Preview(id);
-            if(CurrentLevel==4&&move.hitsCrab&&!crabWarned)
+            if(CurrentLevel==4&&move.CostsCrab&&!crabWarned)
             {
                 world.Highlight(id);
-                hud.Choice("Watch out!","Bumping into a crab costs 1 of your 3 lives, every time.\nThe crab never moves. Use Rescue to take that fish away safely.\nThis tap has not moved the fish.","Got it",()=>{crabWarned=true;world.Highlight(-1);hud.CloseModal();ResolveBoard();},null,null,true);
+                hud.Choice("Watch out!","Every bump counts a crab's number down,\nalso when the crab runs into something.\nIf it reaches 0, you lose. Free its way out first!","Got it",()=>{crabWarned=true;world.Highlight(-1);hud.CloseModal();ResolveBoard();},null,null,true);
                 return;
             }
             if(vibration)FishOutHaptics.Tap();
-            if(!move.ChangesBoard&&!move.hitsCrab&&!move.hitsRock){StartCoroutine(BlockedFish(id));return;}
+            if(!move.ChangesBoard&&!move.CostsCrab&&!move.hitsRock){StartCoroutine(BlockedFish(id));return;}
             if(CurrentLevel==1)guidedTaps++;
             var line=Board.EscapingLine(id);
             if(line.Count==0){StartCoroutine(MoveFish(id));return;}
@@ -310,15 +310,22 @@ namespace FishOut
                 var direction=BoardState.Direction(Board.Find(id).facing);var vector=new Vector3(direction.x,0,direction.y);
                 // The hit plays the moment the fish touches: effect, sound, dizzy stars and the knock on the fish it ran into,
                 // then the short squash-bounce runs on top of it.
-                actor.SetSwimming(false);audioPlayer.Play(result.hitsCrab?"reject":"land");
-                world.PlayEffect(result.hitsCrab?"CrabHit":"Bump",end+vector*.45f);actor.Dizzy();
+                actor.SetSwimming(false);audioPlayer.Play(result.CostsCrab?"reject":"land");
+                world.PlayEffect(result.CostsCrab?"CrabHit":"Bump",end+vector*.45f);actor.Dizzy();
                 var struck=Board.BlockerOf(id);
                 if(struck!=null&&world.actors.TryGetValue(struck.id,out var hit)&&hit)hit.Jolt(vector);
-                if(result.hitsCrab){hud.Hazard();hud.Toast("CRAB!  -1 LIFE");if(vibration)Handheld.Vibrate();}
+                if(result.CostsCrab)
+                {
+                    // The crab that took the bump: the one run into, or the crab that did the running.
+                    int crab=result.hitsCrab?result.struckId:id;
+                    if(result.hitsCrab)world.RefreshCrab(Board,result.struckId);
+                    if(result.crabStops)world.RefreshCrab(Board,id);
+                    int left=result.hitsCrab&&result.crabStops?Mathf.Min(Board.CrabLeft(id),Board.CrabLeft(result.struckId)):Board.CrabLeft(crab);
+                    hud.Hazard();hud.Toast("CRAB!  "+left+" LEFT");if(vibration)Handheld.Vibrate();
+                }
                 for(float t=0;t<.14f;t+=Time.deltaTime){actor.transform.position=end+vector*Mathf.Sin(t/.14f*Mathf.PI)*.07f;yield return null;}
                 actor.transform.position=end;
             }
-            if(result.hitsCrab&&result.exits){hud.Hazard();hud.Toast("CRAB!  -1 LIFE");if(vibration)Handheld.Vibrate();}
             if(CurrentLevel==2&&id==stopLessonFish&&!result.exits)hud.instructions.text="Clear a path, then tap it again.";
             moving.Remove(id);Refresh();ResolveBoard();
         }
@@ -338,7 +345,8 @@ namespace FishOut
             if(Board.IsClear){StartCoroutine(ClearStage());return;}
             if(Board.IsFailed)
             {
-                playing=false;audioPlayer.Play("fail");pointer.gameObject.SetActive(false);hud.Lose(()=>StartLevel(CurrentLevel),()=>ShowHome());return;
+                playing=false;audioPlayer.Play("fail");pointer.gameObject.SetActive(false);
+                hud.Lose(Board.CrabExhausted?"A crab ran out of bumps!":"No way out for the fish!",()=>StartLevel(CurrentLevel),()=>ShowHome());return;
             }
             if(Board.IsDeadlocked)ShowDeadlock();
         }
@@ -358,12 +366,12 @@ namespace FishOut
             {
                 UnlockedLevel=Mathf.Max(UnlockedLevel,CurrentLevel+1);
                 PlayerPrefs.SetInt(SavePrefix+"Unlocked",UnlockedLevel);PlayerPrefs.SetInt(SavePrefix+"Level",CurrentLevel+1);PlayerPrefs.Save();
-                hud.StageClear(Board.Lives,ClearCoins(),"","NEXT",()=>StartLevel(CurrentLevel+1));
+                hud.StageClear(3,ClearCoins(),"","NEXT",()=>StartLevel(CurrentLevel+1));
             }
-            else hud.StageClear(Board.Lives,ClearCoins(),"All stages completed!","HOME",()=>ShowHome());
+            else hud.StageClear(3,ClearCoins(),"All stages completed!","HOME",()=>ShowHome());
         }
-        // Placeholder reward (spec §6): a base amount plus a bonus for every life kept.
-        private int ClearCoins()=>50+Board.Lives*50;
+        // No lives any more (partner feedback 2026-11-11): every clear earns 3 stars and a fixed reward.
+        private int ClearCoins()=>150;
         // Coin wallet shown on the win screen; claimed coins are kept between sessions.
         public int Coins=>PlayerPrefs.GetInt(SavePrefix+"Coins",0);
         public void AddCoins(int amount){PlayerPrefs.SetInt(SavePrefix+"Coins",Mathf.Max(0,Coins+amount));PlayerPrefs.Save();}
@@ -391,7 +399,7 @@ namespace FishOut
         public void ConfirmRetry()
         {
             if(locked)return;
-            hud.Choice("Retry level "+CurrentLevel+"?","The board and both boosters will reset. You will start with 3 lives.","Retry",()=>StartLevel(CurrentLevel),"Cancel",()=>{hud.CloseModal();ResolveBoard();});
+            hud.Choice("Retry level "+CurrentLevel+"?","The board, the crabs and both boosters will reset.","Retry",()=>StartLevel(CurrentLevel),"Cancel",()=>{hud.CloseModal();ResolveBoard();});
         }
         public void OpenSettings()
         {

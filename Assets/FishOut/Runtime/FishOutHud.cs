@@ -11,7 +11,7 @@ namespace FishOut
         public GameObject home, gameplay, modal;
         public Text level, remaining, notice, instructions;
         private Text hintBadge, rescueBadge, rescueCaption;
-        private Image[] hearts;
+        
         // Win / lose mascot: a game fish rendered by its own camera into the UI; released with the modal.
         private GameObject mascotStage;
         private RenderTexture mascotTexture;
@@ -71,15 +71,10 @@ namespace FishOut
             level = LevelBadge(gameplay.transform,new Vector2(.165f,.945f));
             IconButton(gameplay.transform,"Settings",skin?skin.settingsIcon:FishOutIcons.Gear,new Vector2(.905f,.945f),()=>game.OpenSettings());
             IconButton(gameplay.transform,"Retry",skin?skin.retryIcon:FishOutIcons.Retry,new Vector2(.905f,.868f),()=>game.ConfirmRetry());
-            var status=Tile(gameplay.transform,"Status plate",new Vector2(.165f,.862f),new Vector2(290,80),Purple,Cream,7);
-            hearts=new Image[3];
-            for(int i=0;i<3;i++)
-            {
-                hearts[i]=Plate(status.transform,"Life "+(i+1),new Vector2(.16f+i*.18f,.5f),new Vector2(52,52),skin?Color.white:new Color(1f,.3f,.38f));
-                hearts[i].sprite=skin?skin.heart:FishOutIcons.Heart;hearts[i].type=Image.Type.Simple;
-            }
-            if(skin)Icon(status.transform,"Fish icon",skin.fishIcon,Purple,new Vector2(.70f,.5f),48);
-            remaining = Label(status.transform,"3",new Vector2(.87f,.5f),new Vector2(64,60),40,Brown,false);
+            // Lives were removed (partner feedback 2026-11-11): the pill only counts the fish left.
+            var status=Tile(gameplay.transform,"Status plate",new Vector2(.135f,.862f),new Vector2(170,80),Purple,Cream,7);
+            if(skin)Icon(status.transform,"Fish icon",skin.fishIcon,Purple,new Vector2(.32f,.5f),48);
+            remaining = Label(status.transform,"3",new Vector2(skin?.68f:.5f,.5f),new Vector2(70,60),40,Brown,false);
             // Benchmark tutorial card: 80% of the screen wide, cream with a purple rim, one line of large brown type.
             var tip=Rect("Instruction plate",gameplay.transform,new Vector2(.1f,.19f),new Vector2(.9f,.19f),Vector2.zero,new Vector2(0,196));
             instructionPlate=tip.gameObject.AddComponent<Image>();instructionPlate.sprite=RoundSprite();instructionPlate.type=Image.Type.Sliced;instructionPlate.color=TipRim;instructionPlate.raycastTarget=false;
@@ -254,8 +249,6 @@ namespace FishOut
         public void Refresh(BoardState board, int number, bool selecting)
         {
             level.text=number.ToString(); remaining.text=board.Fish.Count.ToString();
-            // Spec §6: the top bar always shows the 3 lives, even on stages without crabs.
-            for(int i=0;i<hearts.Length;i++) { hearts[i].gameObject.SetActive(true); if(skin){hearts[i].sprite=i<board.Lives?skin.heart:skin.heartSpent;hearts[i].color=Color.white;}else hearts[i].color=i<board.Lives?new Color(1f,.3f,.38f):Spent; }
             hint.interactable=!board.HintUsed&&!selecting&&!game.IsLocked;
             rescue.interactable=selecting||(!board.RescueUsed&&!game.IsLocked);
             hintBadge.text=board.HintUsed?"0":"1";
@@ -329,7 +322,7 @@ namespace FishOut
             StartCoroutine(Reveal(panel,icons));
         }
         // Spec §6 clear screen on the project's GUI Pro-SuperCasual "Stage Clear" popup, laid out like the benchmark win screen:
-        // dark veil over a hidden HUD, YOU WIN, stars for the lives kept, one big claim button with the coins, a wallet top-right.
+        // dark veil over a hidden HUD, YOU WIN, 3 stars, one big claim button with the coins, a wallet top-right.
         public const string StageClearResource="UI/StageClear";
         public void StageClear(int earnedStars,int coins,string message,string first,UnityAction yes)
         {
@@ -406,7 +399,7 @@ namespace FishOut
         private const int TitleSize=128;
         // Benchmark lose screen: dark veil, YOU LOSE in lavender with a purple rim, the fish drooping,
         // one purple Try Again pill, and a Home button in the top-left corner.
-        public void Lose(UnityAction retry,UnityAction home)
+        public void Lose(string reason,UnityAction retry,UnityAction home)
         {
             CloseModal();
             gameplay.SetActive(false);
@@ -417,6 +410,8 @@ namespace FishOut
             titleText.horizontalOverflow=HorizontalWrapMode.Overflow;
             foreach(var d in new[]{new Vector2(5,5),new Vector2(7,-2),new Vector2(-2,7)}){var rim=title.gameObject.AddComponent<Outline>();rim.effectColor=PurpleDeep;rim.effectDistance=d;}
             var drop=title.gameObject.AddComponent<Shadow>();drop.effectColor=new Color(.12f,.06f,.3f,.9f);drop.effectDistance=new Vector2(0,-12);
+            // Why the stage ended: a crab out of bumps, or no way left to the cave.
+            if(!string.IsNullOrEmpty(reason)){var why=Label(root,reason,new Vector2(.5f,.5f),new Vector2(900,80),52,Color.white,false);why.rectTransform.anchoredPosition=new Vector2(0,385);why.name="Lose reason";Thick(why,PurpleDeep,3);}
             Mascot(root,new Vector2(0,20),600,false);
             var again=Rect("Button Try Again",root,new Vector2(.5f,.5f),new Vector2(.5f,.5f),new Vector2(0,-540),new Vector2(460,150));
             Clickable(again,Purple,retry,skin?skin.claimButton:null);

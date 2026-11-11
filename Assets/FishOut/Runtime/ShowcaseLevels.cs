@@ -13,7 +13,7 @@ namespace FishOut
             public SpecStage(int fishCount,int rockCount,int crabCount,int facingCrab,int waves,int modelA,int modelB)
             {fish=fishCount;rocks=rockCount;crabs=crabCount;trapped=facingCrab;depth=waves;first=modelA;second=modelB;}
         }
-        // Fish, rocks, crabs, fish facing a crab (only the free Rescue frees it), waves, two models.
+        // Fish, rocks, crabs, fish facing a crab (unused since crabs swim out too: the lesson check asks for a crab that can be bumped), waves, two models.
         private static readonly SpecStage[] Spec=
         {
             // Models: 0 fish blue, 1 fish grey, 2 fish orange, 3-5 turtles, 6-8 octopus. The purple octopus (8) was swapped
@@ -51,12 +51,13 @@ namespace FishOut
                 else water.Add(cell);
             }
             level.channelCells.Add(level.gate);
-            var blocked=new HashSet<Vector2Int>();
+            var blocked=new HashSet<Vector2Int>();var crabs=new List<Vector2Int>();
             try
             {
-                var crabs=PlaceObstacles(level,water,blocked,random,stage.crabs,ObstacleKind.Crab);
+                // Crab cells are spread like obstacles (free water on every side), then become pieces that swim out too.
+                crabs=PlaceObstacles(level,water,blocked,random,stage.crabs,ObstacleKind.Crab);
+                level.obstacles.RemoveAll(o=>o.kind==ObstacleKind.Crab);
                 PlaceObstacles(level,water,blocked,random,stage.rocks,ObstacleKind.Rock);
-                for(int i=0;i<stage.trapped&&i<crabs.Count;i++)AddFacingFish(level,water,blocked,crabs[i],random);
             }
             catch(InvalidOperationException){return null;}
             var free=new List<Vector2Int>();foreach(var cell in water)if(!blocked.Contains(cell))free.Add(cell);
@@ -64,6 +65,7 @@ namespace FishOut
             int need=stage.fish-level.fish.Count;
             for(int i=0;i<need&&i<free.Count;i++)
                 level.fish.Add(new FishData{id=level.fish.Count,cell=free[i],facing=Facing.Up,appearance=Palette(number,free[i],height)});
+            foreach(var cell in crabs){blocked.Remove(cell);level.fish.Add(new FishData{id=level.fish.Count,cell=cell,facing=Facing.Up,appearance=-1,crab=true});}
             try{MixDirections(level,blocked,random,stage.depth);}catch(InvalidOperationException){return null;}
             return Teaches(level,number)?level:null;
         }
@@ -85,10 +87,13 @@ namespace FishOut
                 bool stops=false;foreach(var f in board.Fish){var m=board.Preview(f.id);if(m.ChangesBoard&&!m.exits)stops=true;}
                 if(!stops)return false;
             }
-            if(level.obstacles.Exists(o=>o.kind==ObstacleKind.Crab))
+            // A crab stage needs a fish that could bump a crab, and no crab may start already able to run straight out
+            // before the player has seen it, so each crab first needs another piece to leave.
+            if(level.fish.Exists(f=>f.crab))
             {
-                bool danger=false;foreach(var f in board.Fish)if(board.Preview(f.id).hitsCrab)danger=true;
+                bool danger=false;foreach(var f in board.Fish)if(!f.crab&&board.Preview(f.id).hitsCrab)danger=true;
                 if(!danger)return false;
+                foreach(var f in board.Fish)if(f.crab&&board.Preview(f.id).exits)return false;
             }
             return true;
         }
@@ -126,23 +131,6 @@ namespace FishOut
             if(blocked.Contains(cell))return false;
             foreach(var step in new[]{Vector2Int.up,Vector2Int.down,Vector2Int.left,Vector2Int.right})
                 if(!water.Contains(cell+step)||blocked.Contains(cell+step))return false;
-            return true;
-        }
-        private static void AddFacingFish(LevelData level,List<Vector2Int> water,HashSet<Vector2Int> blocked,Vector2Int crab,System.Random random)
-        {
-            int start=random.Next(4);
-            for(int i=0;i<4;i++)
-            {
-                var facing=(Facing)((start+i)%4);var cell=crab-BoardState.Direction(facing);
-                if(!water.Contains(cell)||blocked.Contains(cell)||!ClearBeyond(level,blocked,crab,BoardState.Direction(facing)))continue;
-                blocked.Add(cell);level.fish.Add(new FishData{id=level.fish.Count,cell=cell,facing=facing,appearance=Palette(level.number,cell,level.height)});return;
-            }
-            throw new InvalidOperationException("Obstacle has no free neighbour");
-        }
-        // Once the toll is paid, nothing fixed may stand between the crab and the road.
-        private static bool ClearBeyond(LevelData level,HashSet<Vector2Int> blocked,Vector2Int crab,Vector2Int step)
-        {
-            for(var p=crab+step;p.x>=0&&p.y>=0&&p.x<level.width&&p.y<level.height&&!level.IsChannel(p);p+=step)if(blocked.Contains(p))return false;
             return true;
         }
         // Builds the solution backwards from the first fish to leave, so every stage stays solvable.
