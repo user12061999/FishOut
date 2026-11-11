@@ -15,6 +15,25 @@ namespace FishOut
         public static Sprite Bulb=>Get("Bulb",BulbShape);
         public static Sprite Buoy=>Get("Buoy",BuoyShape);
         public static Sprite Star=>Get("Star",StarShape);
+        public static Sprite Arrow=>Get("Arrow",ArrowShape);
+        public static Sprite Twinkle=>Get("Twinkle",TwinkleShape);
+        // A soft round glow (alpha falls off smoothly to the edge), for halos behind icons.
+        public static Sprite Glow
+        {
+            get
+            {
+                if(cache.TryGetValue("Glow",out var sprite)&&sprite)return sprite;
+                var texture=new Texture2D(Size,Size,TextureFormat.RGBA32,false){name="Icon Glow",wrapMode=TextureWrapMode.Clamp};
+                var pixels=new Color32[Size*Size];
+                for(int y=0;y<Size;y++)for(int x=0;x<Size;x++)
+                {
+                    float d=new Vector2((x+.5f)/Size*2-1,(y+.5f)/Size*2-1).magnitude;
+                    float a=Mathf.Clamp01(1-d);pixels[y*Size+x]=new Color32(255,255,255,(byte)(a*a*255));
+                }
+                texture.SetPixels32(pixels);texture.Apply();
+                return cache["Glow"]=Sprite.Create(texture,new Rect(0,0,Size,Size),new Vector2(.5f,.5f));
+            }
+        }
         private static Sprite Get(string name,Func<Vector2,float> shape)
         {
             if(cache.TryGetValue(name,out var sprite)&&sprite)return sprite;
@@ -63,6 +82,15 @@ namespace FishOut
             return Mathf.Min(glass,neck);
         }
         private static float BuoyShape(Vector2 p)=>Mathf.Abs(p.magnitude-.6f)-.27f;
+        // A chunky arrow pointing straight down: shaft on top, head with its tip at the bottom.
+        private static float ArrowShape(Vector2 p)
+        {
+            float shaft=Mathf.Max(Mathf.Abs(p.x)-.24f,Mathf.Abs(p.y-.38f)-.5f);
+            float head=Mathf.Max(p.y+.02f,(Mathf.Abs(p.x)*.83f-.7f*(p.y+.9f))/1.086f);
+            return Mathf.Min(shaft,head);
+        }
+        // Four-pointed twinkle (an astroid), the classic sparkle glint.
+        private static float TwinkleShape(Vector2 p)=>(Mathf.Sqrt(Mathf.Abs(p.x))+Mathf.Sqrt(Mathf.Abs(p.y))-.95f)*.45f;
         private static float StarShape(Vector2 p)
         {
             // Fold into one arm of the star, then measure against its outer edge.

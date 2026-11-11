@@ -39,6 +39,7 @@ namespace FishOut
         private float lastTapTime,paceReference;
         private readonly List<Vector2> presses=new List<Vector2>();
         private Text pointer;
+        private RectTransform pointerHand;
         private int screenWidth,screenHeight;
         private int uiInputFrame=-1;
         private readonly List<RaycastResult> uiHits=new List<RaycastResult>();
@@ -69,8 +70,16 @@ namespace FishOut
             var audioObject=new GameObject("Game audio"); audioObject.transform.SetParent(transform,false);
             audioPlayer=audioObject.AddComponent<FishOutAudio>(); audioPlayer.Initialize(sound,music);
             var canvas=new GameObject("Fish Out UI",typeof(RectTransform)); canvas.transform.SetParent(transform,false);
-            hud=canvas.AddComponent<FishOutHud>(); hud.Build(this,Resources.Load<Font>("Fonts/Sen-ExtraBold"));
-            pointer=hud.Label(canvas.transform,"TAP",new Vector2(.5f,.5f),new Vector2(150,70),30,new Color(1,.91f,.38f));pointer.gameObject.SetActive(false);
+            hud=canvas.AddComponent<FishOutHud>(); hud.Build(this,Resources.Load<Font>("Fonts/Fredoka-Bold"));
+            // Tutorial hand: the benchmark's white glove, its fingertip pressing on the fish to tap (about 15-20% of the screen wide).
+            pointer=hud.Label(canvas.transform,"",new Vector2(.5f,.5f),new Vector2(10,10),10,Color.white,false);pointer.name="Tutorial hand";pointer.gameObject.SetActive(false);
+            var glove=HudSkin.Load()?HudSkin.Load().tutorialHand:null;
+            var hand=FishOutHud.Rect("Hand",pointer.transform,new Vector2(.5f,.5f),new Vector2(.5f,.5f),Vector2.zero,new Vector2(230,230)).gameObject.AddComponent<UnityEngine.UI.Image>();
+            hand.raycastTarget=false;
+            if(glove){hand.sprite=glove;hand.preserveAspect=true;hand.rectTransform.pivot=new Vector2(.2f,.86f);}
+            else{hand.sprite=FishOutIcons.Arrow;hand.color=new Color(1,.86f,.2f);hand.rectTransform.pivot=new Vector2(.5f,0);hand.rectTransform.sizeDelta=new Vector2(118,140);}
+            var handShade=hand.gameObject.AddComponent<UnityEngine.UI.Shadow>();handShade.effectColor=new Color(0,0,0,.3f);handShade.effectDistance=new Vector2(6,-8);
+            pointerHand=hand.rectTransform;
             if(!EventSystem.current)
             {
                 var events=new GameObject("EventSystem",typeof(EventSystem)); events.transform.SetParent(transform,false);
@@ -126,7 +135,12 @@ namespace FishOut
         }
         public void ShowHome()
         {
-            Time.timeScale=1;playing=false;RebuildBoard();hud.SetHome(true,CurrentLevel);hud.instructions.text="";
+            Time.timeScale=1;playing=false;RebuildBoard();HideBoardForHome();hud.SetHome(true,CurrentLevel);hud.instructions.text="";
+        }
+        // Home shows only the sea and the cave: the level's board, its rim and its pieces stay hidden until a level starts.
+        private void HideBoardForHome()
+        {
+            foreach(var part in new[]{"Board checker","Open board boundary","Fish and obstacles"}){var child=world.transform.Find(part);if(child)child.gameObject.SetActive(false);}
         }
         public void OpenLevelSelect(){hud.LevelSelect(FishOutLevels.Count,CurrentLevel,UnlockedLevel);}
         public void StartLevel(int number)
@@ -135,12 +149,13 @@ namespace FishOut
             playing=true;RebuildBoard();hud.SetHome(false,CurrentLevel);hud.FadeIn();crabWarned=false;
             switch(CurrentLevel)
             {
+                // One short line each, like the benchmark's tutorial card.
                 case 1: hud.instructions.text="Tap a fish to send it to the cave.";tutorialTarget=NearestEscaping();break;
-                case 2: hud.instructions.text="Tap the highlighted fish. It stops before another fish.";tutorialTarget=stopLessonFish=FindStoppingFish();lessonActive=true;break;
-                case 3: hud.instructions.text="Rocks never move. Plan the order around them.";break;
-                case 4: hud.instructions.text="Watch out! Every bump into a crab costs a life.";break;
-                case 5: hud.instructions.text="Rocks and crabs together. Think before you tap!";break;
-                default:hud.instructions.text="Clear a path and lead every fish to the cave.";break;
+                case 2: hud.instructions.text="Tap it. Fish stop at other fish.";tutorialTarget=stopLessonFish=FindStoppingFish();lessonActive=true;break;
+                case 3: hud.instructions.text="Rocks never move. Plan around them.";break;
+                case 4: hud.instructions.text="Every crab bump costs a life!";break;
+                case 5: hud.instructions.text="Mind the rocks and the crabs!";break;
+                default:hud.instructions.text="Lead every fish to the cave.";break;
             }
             world.Highlight(tutorialTarget);pointer.gameObject.SetActive(tutorialTarget>=0);lastTapTime=Time.unscaledTime;Refresh();
         }
@@ -183,7 +198,7 @@ namespace FishOut
         }
         // Spec §4: taps are ignored while a fish is moving on the board. Once it has reached the road to the cave,
         // it no longer blocks anything on the board, so the next tap is accepted.
-        private const float CaveSpeed=2f;
+        private const float CaveSpeed=3f;
         public bool FishMovingOnBoard
         {
             get
@@ -200,7 +215,7 @@ namespace FishOut
             if(CurrentLevel==4&&move.hitsCrab&&!crabWarned)
             {
                 world.Highlight(id);
-                hud.Choice("WATCH OUT!","Bumping into a crab costs 1 of your 3 lives, every time.\nThe crab never moves. Use Rescue to take that fish away safely.\nThis tap has not moved the fish.","GOT IT",()=>{crabWarned=true;world.Highlight(-1);hud.CloseModal();ResolveBoard();});
+                hud.Choice("Watch out!","Bumping into a crab costs 1 of your 3 lives, every time.\nThe crab never moves. Use Rescue to take that fish away safely.\nThis tap has not moved the fish.","Got it",()=>{crabWarned=true;world.Highlight(-1);hud.CloseModal();ResolveBoard();},null,null,true);
                 return;
             }
             if(vibration)FishOutHaptics.Tap();
@@ -256,7 +271,8 @@ namespace FishOut
             float pace=Pace();
             actor.Mover.maximumSpeed=(result.exits?12f:7f)*pace*PaintedBackdrop.Calibration.boardSpeed;
             actor.Mover.startSpeed=result.exits?5f:3f;
-            actor.Mover.acceleration=result.exits?96f:72f;
+            // A fish that stops at a blocker brakes late and hard, so the hit lands on contact rather than after a slow creep.
+            actor.Mover.acceleration=result.exits?96f:150f;
             // An escaping fish eases into the slower road and cave speeds instead of braking hard, so the queue behind it never jolts.
             actor.Mover.easeDown=result.exits&&SmoothQueue?9f*pace:float.PositiveInfinity;
             if(result.ChangesBoard){actor.Pop(.12f,.09f);audioPlayer.Play("peel");}
@@ -292,15 +308,18 @@ namespace FishOut
             else
             {
                 var direction=BoardState.Direction(Board.Find(id).facing);var vector=new Vector3(direction.x,0,direction.y);
-                for(float t=0;t<.18f;t+=Time.deltaTime){actor.transform.position=end+vector*Mathf.Sin(t/.18f*Mathf.PI)*.07f;yield return null;}
-                actor.transform.position=end;actor.SetSwimming(false);audioPlayer.Play(result.hitsCrab?"reject":"land");
-                world.PlayEffect(result.hitsCrab?"CrabHit":"Bump",end);actor.Dizzy();
-                // The fish it ran into is knocked a little and shakes it off.
+                // The hit plays the moment the fish touches: effect, sound, dizzy stars and the knock on the fish it ran into,
+                // then the short squash-bounce runs on top of it.
+                actor.SetSwimming(false);audioPlayer.Play(result.hitsCrab?"reject":"land");
+                world.PlayEffect(result.hitsCrab?"CrabHit":"Bump",end+vector*.45f);actor.Dizzy();
                 var struck=Board.BlockerOf(id);
                 if(struck!=null&&world.actors.TryGetValue(struck.id,out var hit)&&hit)hit.Jolt(vector);
+                if(result.hitsCrab){hud.Hazard();hud.Toast("CRAB!  -1 LIFE");if(vibration)Handheld.Vibrate();}
+                for(float t=0;t<.14f;t+=Time.deltaTime){actor.transform.position=end+vector*Mathf.Sin(t/.14f*Mathf.PI)*.07f;yield return null;}
+                actor.transform.position=end;
             }
-            if(result.hitsCrab){hud.Hazard();hud.Toast("CRAB!  -1 LIFE");if(vibration)Handheld.Vibrate();}
-            if(CurrentLevel==2&&id==stopLessonFish&&!result.exits)hud.instructions.text="Fish stay where they stop. Clear a path, then tap again.";
+            if(result.hitsCrab&&result.exits){hud.Hazard();hud.Toast("CRAB!  -1 LIFE");if(vibration)Handheld.Vibrate();}
+            if(CurrentLevel==2&&id==stopLessonFish&&!result.exits)hud.instructions.text="Clear a path, then tap it again.";
             moving.Remove(id);Refresh();ResolveBoard();
         }
         private IEnumerator RescueFish(int id)
@@ -319,7 +338,7 @@ namespace FishOut
             if(Board.IsClear){StartCoroutine(ClearStage());return;}
             if(Board.IsFailed)
             {
-                playing=false;audioPlayer.Play("fail");hud.Result("OUT OF LIVES",Board.Fish.Count+" fish are still waiting.",FishOutIcons.Heart,0,"RETRY",()=>StartLevel(CurrentLevel),"HOME",()=>ShowHome());return;
+                playing=false;audioPlayer.Play("fail");pointer.gameObject.SetActive(false);hud.Lose(()=>StartLevel(CurrentLevel),()=>ShowHome());return;
             }
             if(Board.IsDeadlocked)ShowDeadlock();
         }
@@ -339,16 +358,19 @@ namespace FishOut
             {
                 UnlockedLevel=Mathf.Max(UnlockedLevel,CurrentLevel+1);
                 PlayerPrefs.SetInt(SavePrefix+"Unlocked",UnlockedLevel);PlayerPrefs.SetInt(SavePrefix+"Level",CurrentLevel+1);PlayerPrefs.Save();
-                hud.StageClear(Board.Lives,ClearCoins(),"All fish are free!","NEXT",()=>StartLevel(CurrentLevel+1));
+                hud.StageClear(Board.Lives,ClearCoins(),"","NEXT",()=>StartLevel(CurrentLevel+1));
             }
             else hud.StageClear(Board.Lives,ClearCoins(),"All stages completed!","HOME",()=>ShowHome());
         }
-        // Placeholder reward (spec §6): a base amount plus a bonus for every life kept. Coins are not stored yet.
+        // Placeholder reward (spec §6): a base amount plus a bonus for every life kept.
         private int ClearCoins()=>50+Board.Lives*50;
+        // Coin wallet shown on the win screen; claimed coins are kept between sessions.
+        public int Coins=>PlayerPrefs.GetInt(SavePrefix+"Coins",0);
+        public void AddCoins(int amount){PlayerPrefs.SetInt(SavePrefix+"Coins",Mathf.Max(0,Coins+amount));PlayerPrefs.Save();}
         private void ShowDeadlock()
         {
             pointer.gameObject.SetActive(false);
-            hud.Choice("NO MOVES LEFT","No fish can move or escape."+(Board.RescueUsed?"\nRescue has already been used.":"\nUse Rescue to remove one fish, or retry."),"RETRY",()=>ConfirmRetry(),Board.RescueUsed?"HOME":"USE RESCUE",()=>{if(Board.RescueUsed)ShowHome();else{hud.CloseModal();BeginRescue();}});
+            hud.Choice("No moves left","No fish can move or escape."+(Board.RescueUsed?"\nRescue has already been used.":"\nUse Rescue to remove one fish, or retry."),"Retry",()=>ConfirmRetry(),Board.RescueUsed?"Home":"Use Rescue",()=>{if(Board.RescueUsed)ShowHome();else{hud.CloseModal();BeginRescue();}});
         }
         public void UseHint()
         {
@@ -369,7 +391,7 @@ namespace FishOut
         public void ConfirmRetry()
         {
             if(locked)return;
-            hud.Choice("RETRY LEVEL "+CurrentLevel+"?","The board and both boosters will reset. You will start with 3 lives.","RETRY",()=>StartLevel(CurrentLevel),"CANCEL",()=>{hud.CloseModal();ResolveBoard();});
+            hud.Choice("Retry level "+CurrentLevel+"?","The board and both boosters will reset. You will start with 3 lives.","Retry",()=>StartLevel(CurrentLevel),"Cancel",()=>{hud.CloseModal();ResolveBoard();});
         }
         public void OpenSettings()
         {
@@ -377,6 +399,8 @@ namespace FishOut
             settings=true;hud.Settings(sound,music,vibration);
         }
         public void CloseSettings(){settings=false;hud.CloseModal();ResolveBoard();}
+        // Home gear: the same screen with only the toggles; closing returns to Home.
+        public void OpenHomeSettings(){if(hud.modal)return;hud.Settings(sound,music,vibration,true);}
         public void SetSound(bool value){sound=value;audioPlayer.SetSound(value);SaveSetting("Sound",value);}
         public void SetMusic(bool value){music=value;audioPlayer.SetMusic(value);SaveSetting("Music",value);}
         public void SetVibration(bool value){vibration=value;SaveSetting("Vibration",value);}
@@ -391,9 +415,13 @@ namespace FishOut
             QueueOnRoad();
             if(pointer.gameObject.activeSelf&&world.actors.TryGetValue(tutorialTarget,out var target)&&target)
             {
-                var point=boardCamera.WorldToScreenPoint(target.transform.position+Vector3.up*.8f);
+                var point=boardCamera.WorldToScreenPoint(target.transform.position+Vector3.up*.3f);
                 RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)hud.transform,point,null,out var local);
-                pointer.rectTransform.anchoredPosition=local+Vector2.up*(24+Mathf.Sin(Time.unscaledTime*5)*8);
+                // Tap loop: the glove hovers off to the lower right, presses onto the fish, holds a beat, lifts.
+                float cycle=Time.unscaledTime*1.1f%1f;
+                float press=Mathf.SmoothStep(0,1,cycle<.35f?cycle/.35f:cycle<.55f?1:1-(cycle-.55f)/.45f);
+                pointer.rectTransform.anchoredPosition=local+new Vector2(40,-40)*(1-press);
+                pointerHand.localScale=Vector3.one*Mathf.Lerp(1.08f,.9f,press);
             }
             if(!playing||locked||settings||hud.modal||uiInputFrame==Time.frameCount)return;
             if(CurrentLevel==1&&!pointer.gameObject.activeSelf&&guidedTaps>=3&&moving.Count==0&&Time.unscaledTime-lastTapTime>4)

@@ -37,6 +37,8 @@ namespace FishOut
             topTexture = null; topKey = null;
         }
         private const float PaintingHeight = -.2f;
+        // Share of the painting's width that always stays on screen, and how far the painted quad runs on past its edges (mirrored).
+        public const float VisibleWidth = .97f, Overscan = .35f, ExtraBelow = .6f;
         private const float Pitch = 50, ScaleExponent = .85f;
         private static Texture2D texture;
 
@@ -209,8 +211,12 @@ namespace FishOut
             var quad = new GameObject("Painted seabed", typeof(MeshFilter), typeof(MeshRenderer));
             quad.transform.SetParent(parent, false);
             var mesh = new Mesh { name = "Painted seabed" };
-            mesh.SetVertices(new List<Vector3> { ImageToWorld(level, new Vector2(0, 1), -.2f), ImageToWorld(level, new Vector2(0, 0), -.2f), ImageToWorld(level, new Vector2(1, 0), -.2f), ImageToWorld(level, new Vector2(1, 1), -.2f) });
-            mesh.SetUVs(0, new List<Vector2> { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0) });
+            // Tall or wide screens see past the painting's edges; the quad runs on with the painting mirrored, so reef
+            // continues around it instead of a flat clear colour (the camera never crops the board to avoid them).
+            const float overV = Overscan, overH = Overscan * .3f;
+            if (Texture) Texture.wrapMode = TextureWrapMode.Mirror;
+            mesh.SetVertices(new List<Vector3> { ImageToWorld(level, new Vector2(-overH, 1 + overV), -.2f), ImageToWorld(level, new Vector2(-overH, -overV), -.2f), ImageToWorld(level, new Vector2(1 + overH, -overV), -.2f), ImageToWorld(level, new Vector2(1 + overH, 1 + overV), -.2f) });
+            mesh.SetUVs(0, new List<Vector2> { new Vector2(-overH, -overV), new Vector2(-overH, 1 + overV), new Vector2(1 + overH, 1 + overV), new Vector2(1 + overH, -overV) });
             mesh.SetTriangles(new[] { 0, 1, 2, 0, 2, 3 }, 0); mesh.RecalculateNormals(); mesh.RecalculateBounds();
             meshes.Add(mesh); quad.GetComponent<MeshFilter>().sharedMesh = mesh;
             var painting = new Material(template) { name = "Painted seabed", color = Color.white, mainTexture = Texture, renderQueue = 2050 };
@@ -506,12 +512,17 @@ namespace FishOut
             var rotation = Quaternion.Euler(layout.pitch, 0, 0);
             float screenDepth = layout.depth * Mathf.Sin(layout.pitch * Mathf.Deg2Rad);
             camera.rect = new Rect(0, 0, 1, 1);
-            // Slightly inside the painting on both axes, so no clear colour shows at any edge.
-            camera.orthographicSize = Mathf.Min(screenDepth * .5f, layout.width / (2 * aspect)) * .99f;
+            // Slightly inside the painting on both axes where the screen allows it. A screen narrower than the painting
+            // (20:9 phones) would crop the board's sides, so there the whole width is kept and the mirrored overscan fills above and below.
+            camera.orthographicSize = Mathf.Max(Mathf.Min(screenDepth * .5f, layout.width / (2 * aspect)) * .99f, layout.width * VisibleWidth / (2 * aspect));
             camera.transform.rotation = rotation;
             // Aim at the painting's own plane (it lies below the board), otherwise the tilt shifts it down and
             // leaves a strip of background colour along the top of the screen.
             camera.transform.position = layout.center + Vector3.up * PaintingHeight - rotation * Vector3.forward * 40;
+            // Extra height on a tall screen goes mostly below the painting (mirrored reef under the buttons), so the cave
+            // stays near the top bar and the board sits clear of the bottom buttons.
+            float extra = camera.orthographicSize - screenDepth * .5f * .99f;
+            if (extra > 0) camera.transform.position -= camera.transform.up * extra * ExtraBelow;
         }
     }
 }

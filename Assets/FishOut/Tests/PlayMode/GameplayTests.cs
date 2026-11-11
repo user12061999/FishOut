@@ -140,7 +140,7 @@ namespace FishOut.Tests
             int id=game.Board.FindEscapingFish();game.TapFish(id);Assert.IsTrue(game.IsBusy);
             game.ConfirmRetry();Assert.IsNotNull(game.Hud.modal,"Retry opens while a fish swims");
             yield return Idle();Assert.IsNotNull(game.Hud.modal,"Finishing a swim keeps the dialog open");
-            Click("CANCEL");Assert.IsNull(game.Hud.modal);
+            Click("Cancel");Assert.IsNull(game.Hud.modal);
             game.TapFish(game.Board.FindEscapingFish());game.OpenSettings();Assert.IsNotNull(game.Hud.modal,"Settings open while a fish swims");
             game.CloseSettings();yield return Idle();
         }
@@ -148,14 +148,14 @@ namespace FishOut.Tests
         public IEnumerator LevelSelectOpensTheChosenLevel()
         {
             game.OpenLevelSelect();Assert.IsNotNull(game.Hud.modal);
-            Click("BACK");Assert.IsNull(game.Hud.modal);
+            Click("X");Assert.IsNull(game.Hud.modal);
             game.OpenLevelSelect();
             var buttons=game.Hud.modal.GetComponentsInChildren<Button>();
             Assert.AreEqual(FishOutLevels.Count+1,buttons.Length);
             foreach(var button in buttons)
             {
                 var text=button.GetComponentInChildren<Text>().text;
-                if(text!="BACK")Assert.AreEqual(text=="1",button.interactable,"Only the first level starts unlocked");
+                if(text!="X")Assert.AreEqual(text=="1",button.interactable,"Only the first level starts unlocked");
             }
             Click("1");yield return null;
             Assert.AreEqual(1,game.CurrentLevel);Assert.IsTrue(game.IsPlayingStage);Assert.IsNull(game.Hud.modal);
@@ -170,7 +170,7 @@ namespace FishOut.Tests
             Assert.AreEqual(stop,game.Board.Find(id).cell);Assert.AreEqual(3,game.Board.Lives);
             game.OpenSettings();Assert.IsNotNull(game.Hud.modal);game.SetSound(false);game.SetMusic(false);game.SetVibration(false);
             game.TapFish(game.Board.FindEscapingFish());Assert.AreEqual(count,game.Board.Fish.Count);game.CloseSettings();
-            game.ConfirmRetry();Click("RETRY");yield return null;
+            game.ConfirmRetry();Click("Retry");yield return null;
             Assert.AreEqual(start,game.Board.Find(id).cell);Assert.AreEqual(3,game.Board.Lives);
             Assert.IsFalse(game.Board.HintUsed);Assert.IsFalse(game.Board.RescueUsed);
         }
@@ -179,7 +179,7 @@ namespace FishOut.Tests
         {
             game.StartLevel(4);int id=game.Board.Fish.First(f=>game.Board.Preview(f.id).hitsCrab).id;
             game.TapFish(id);Assert.IsNotNull(game.Hud.modal);Assert.AreEqual(3,game.Board.Lives);Assert.IsFalse(game.IsBusy);
-            Click("GOT IT");Assert.IsNull(game.Hud.modal);
+            Click("Got it");Assert.IsNull(game.Hud.modal);
             game.TapFish(id);yield return Idle();Assert.AreEqual(2,game.Board.Lives);
             Assert.IsTrue(game.Board.Preview(id).hitsCrab,"Spec: the crab stays and keeps blocking");
         }
@@ -200,7 +200,7 @@ namespace FishOut.Tests
             var payer=game.Board.Fish.First(f=>game.Board.Preview(f.id).hitsCrab);
             for(int paid=1;paid<=3;paid++){game.TapFish(payer.id);yield return Idle();Assert.AreEqual(3-paid,game.Board.Lives);}
             Assert.IsTrue(game.Board.IsFailed);Assert.IsFalse(game.IsPlayingStage);Assert.IsNotNull(game.Hud.modal);
-            Click("RETRY");yield return null;Assert.AreEqual(3,game.Board.Lives);Assert.IsTrue(game.IsPlayingStage);
+            Click("Try Again");yield return null;Assert.AreEqual(3,game.Board.Lives);Assert.IsTrue(game.IsPlayingStage);
         }
         [UnityTest]
         public IEnumerator SwimmersOnTheRoadKeepTheirDistance()
@@ -242,7 +242,7 @@ namespace FishOut.Tests
                 game.TapFish(game.Board.Fish[0].id);
                 yield return Idle();
                 Assert.IsTrue(game.Board.IsClear,"Level "+number);Assert.IsNotNull(game.Hud.modal);Assert.GreaterOrEqual(game.Board.Lives,1);
-                if(number<FishOutLevels.Count){Assert.AreEqual(number+1,game.UnlockedLevel);Click("NEXT");yield return null;Assert.AreEqual(number+1,game.CurrentLevel);}
+                if(number<FishOutLevels.Count){Assert.AreEqual(number+1,game.UnlockedLevel);Click("NEXT");yield return new WaitForSecondsRealtime(1.3f);Assert.AreEqual(number+1,game.CurrentLevel);}
             }
         }
     }

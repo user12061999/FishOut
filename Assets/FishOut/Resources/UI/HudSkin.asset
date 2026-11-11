@@ -33,3 +33,20 @@ MonoBehaviour:
   currentLevelButton: {fileID: 21300000, guid: f696c5de5bea644b3ba78434e4939f8d, type: 3}
   toggleBg: {fileID: 21300000, guid: 6811196040b84412ea2ffd2686edae8e, type: 3}
   toggleCheck: {fileID: 21300000, guid: 6b557df3ef5e446ae9cff8ab68c0f848, type: 3}
+  claimButton: {fileID: 21300000, guid: 83474942a109b4cdbb4726b7ee33120f, type: 3}
+  coin: {fileID: 21300000, guid: cb9ac5c430df5468c8ecf26434823ecb, type: 3}
+  tutorialHand: {fileID: 21300000, guid: 9c6e15a101b29468e9d95b7163919130, type: 3}
+  whiteTile: {fileID: 21300000, guid: 048495ad29a2f46abbb73dea09cd98a7, type: 3}
+  whitePill: {fileID: 21300000, guid: 3eba92f7629b145ae9366b196000a3f3, type: 3}
+  whitePanel: {fileID: 21300000, guid: d608dfee618cd49749a7aca2c3ce2538, type: 3}
+  levelRibbon: {fileID: 21300000, guid: 205b81059899941c9a9596378eea8d34, type: 3}
+  homeIcon: {fileID: 21300000, guid: 61331347d2e9841bfb8164e5da1755d8, type: 3}
+  circle: {fileID: 21300000, guid: d2d3acb5f1a5847df85947b6a08f7a69, type: 3}
+  soundIcon: {fileID: 21300000, guid: a7ba924f3c5034f7abd72e16c2779afb, type: 3}
+  soundOffIcon: {fileID: 21300000, guid: 43261492a799943f3b8749b39b0668f2, type: 3}
+  musicIcon: {fileID: 21300000, guid: b5009884e9bac46c6b79e893f36fe289, type: 3}
+  musicOffIcon: {fileID: 21300000, guid: eddfee04fb9a44b75bb5708b252d01ba, type: 3}
+  vibrationIcon: {fileID: 21300000, guid: 20775b7c9d7924cff9deb8ece3c8d4d7, type: 3}
+  playIcon: {fileID: 21300000, guid: ca64cb13cba51422680c43ba914cf706, type: 3}
+  levelsIcon: {fileID: 21300000, guid: e4c795ff71680478b8e19d0041a84968, type: 3}
+  lockIcon: {fileID: 21300000, guid: 1eb0217bf1f784956bbb96cf1663c557, type: 3}
