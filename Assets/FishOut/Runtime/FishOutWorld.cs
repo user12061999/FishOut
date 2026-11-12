@@ -14,6 +14,7 @@ namespace FishOut
         private readonly HashSet<Vector2Int> shownCracked=new HashSet<Vector2Int>();
         public readonly Dictionary<int,FishActor> actors = new Dictionary<int,FishActor>();
         private readonly Dictionary<int,UnityEngine.UI.Text> crabCounters=new Dictionary<int,UnityEngine.UI.Text>();
+        private readonly Dictionary<int,FishOutCrabBomb> crabBombs=new Dictionary<int,FishOutCrabBomb>();
         public Vector3 Cell(Vector2Int p) => level==null?new Vector3(p.x-5*.5f,.10f,p.y-7*.5f):ConveyorNetwork.World(level,p,.10f);
         public void Build(FishOutGame game, BoardState board)
         {
@@ -169,16 +170,33 @@ namespace FishOut
             var m=new Material(Shader.Find("UI/Default")); m.name=name; m.color=color;
             m.SetInt("unity_GUIZTestMode",(int)CompareFunction.Always); m.renderQueue=queue; owned.Add(m); return m;
         }
-        // The number on each crab: big white digits with a dark outline printed on its back, always facing the camera.
+        // Each crab carries a cartoon bomb (partner art) with its bump counter printed on it, always facing the camera.
+        // The fuse burns the whole time; the bomb glows red at its last bump and blows up when it runs out.
+        public const float BombScale=.62f, BackHeight=.52f, BombHeight=1.12f, NumberDrop=.38f;
         private void CrabCounter(FishOutGame game,Transform crab,int id,int value)
         {
-            var go=new GameObject("Crab counter",typeof(RectTransform));go.transform.SetParent(crab,false);
-            var cam=Camera.main;var toCamera=cam?(cam.transform.position-crab.position).normalized:Vector3.zero;
-            go.transform.position=crab.position+Vector3.up*.42f+toCamera*.5f;go.transform.localScale=Vector3.one*.0062f;
-            var canvas=go.AddComponent<Canvas>();canvas.renderMode=RenderMode.WorldSpace;canvas.sortingOrder=5;
-            ((RectTransform)go.transform).sizeDelta=new Vector2(110,110);
-            go.AddComponent<FishOutFaceCamera>();
-            var text=new GameObject("Number",typeof(RectTransform)).AddComponent<UnityEngine.UI.Text>();text.transform.SetParent(go.transform,false);
+            var cam=Camera.main;
+            
+            var prefab=Resources.Load<GameObject>("Props/CrabBomb");
+            FishOutCrabBomb bomb=null;
+            if(prefab)
+            {
+                var go=Instantiate(prefab,crab,false);go.name="Crab bomb";
+                go.transform.localScale=Vector3.one*BombScale;go.transform.position=OnBack(cam,crab.position);
+                if(cam){var flat=Vector3.ProjectOnPlane(cam.transform.position-crab.position,Vector3.up);if(flat.sqrMagnitude>.001f)go.transform.rotation=Quaternion.LookRotation(flat);}
+                bomb=go.AddComponent<FishOutCrabBomb>();
+            }
+            // The number is printed on the lower half of the bomb, centred under its fuse.
+            var counter=new GameObject("Crab counter",typeof(RectTransform));
+            Vector3 middle=OnBack(cam,crab.position);float radius=.41f*BombScale;
+            var toCamera=cam?(cam.transform.position-middle).normalized:Vector3.zero;
+            counter.transform.SetParent(bomb?bomb.transform:crab,false);
+            counter.transform.position=StackedOver(cam,crab.position,middle+toCamera*radius*1.1f+Vector3.down*radius*NumberDrop);
+            counter.transform.localScale=Vector3.one*.0042f;counter.transform.localScale/=counter.transform.parent.lossyScale.x;
+            var canvas=counter.AddComponent<Canvas>();canvas.renderMode=RenderMode.WorldSpace;canvas.sortingOrder=5;
+            ((RectTransform)counter.transform).sizeDelta=new Vector2(110,110);
+            counter.AddComponent<FishOutFaceCamera>();
+            var text=new GameObject("Number",typeof(RectTransform)).AddComponent<UnityEngine.UI.Text>();text.transform.SetParent(counter.transform,false);
             ((RectTransform)text.transform).sizeDelta=new Vector2(110,110);text.alignment=TextAnchor.MiddleCenter;text.fontSize=96;text.color=Color.white;text.raycastTarget=false;
             // Digits taller than the 110 box would be hidden by Text's truncation.
             text.verticalOverflow=VerticalWrapMode.Overflow;text.horizontalOverflow=HorizontalWrapMode.Overflow;
@@ -188,13 +206,48 @@ namespace FishOut
             var edge=text.gameObject.AddComponent<UnityEngine.UI.Outline>();edge.effectColor=dark;edge.effectDistance=new Vector2(2.5f,-2.5f);
             var edge2=text.gameObject.AddComponent<UnityEngine.UI.Outline>();edge2.effectColor=dark;edge2.effectDistance=new Vector2(-2.5f,2.5f);
             text.text=value.ToString();crabCounters[id]=text;
+            if(bomb){crabBombs[id]=bomb;bomb.SetLeft(value);}
+        }
+        // The camera looks down at an angle, so a point straight above an off-centre crab drifts sideways on screen.
+        // Slide it along its own depth until it sits on the same screen column as the crab.
+        private static Vector3 StackedOver(Camera cam,Vector3 anchor,Vector3 point)
+        {
+            if(!cam)return point;
+            var screen=cam.WorldToScreenPoint(point);screen.x=cam.WorldToScreenPoint(anchor).x;
+            return cam.ScreenToWorldPoint(screen);
+        }
+        // Seen from the camera the bomb covers the middle of the crab's back: it rides the camera ray through that spot,
+        // lifted to BombHeight so the shell sits in front of the body instead of sinking into it.
+        private static Vector3 OnBack(Camera cam,Vector3 crab)
+        {
+            var back=crab+Vector3.up*BackHeight;
+            if(!cam)return crab+Vector3.up*BombHeight;
+            var ray=(cam.transform.position-back).normalized;
+            return ray.y>.05f?back+ray*((BombHeight-BackHeight)/ray.y):crab+Vector3.up*BombHeight;
         }
         public void RefreshCrab(BoardState board,int id)
         {
             if(!crabCounters.TryGetValue(id,out var text)||!text)return;
-            text.text=board.CrabLeft(id).ToString();
-            StartCoroutine(Pop(text.transform.parent));
+            int left=board.CrabLeft(id);
+            text.text=Mathf.Max(0,left).ToString();
+            if(crabBombs.TryGetValue(id,out var bomb)&&bomb){bomb.SetLeft(left);StartCoroutine(Pop(bomb.transform));}
+            else StartCoroutine(Pop(text.transform.parent));
         }
+        // Blows up every bomb whose crab has no bumps left; true when at least one went off.
+        public bool ExplodeCrabs(BoardState board)
+        {
+            bool any=false;
+            foreach(var pair in crabBombs)
+            {
+                if(!pair.Value||board.CrabLeft(pair.Key)>0)continue;
+                var position=pair.Value.transform.position;
+                var blast=SpawnEffect("BombBlast",transform);
+                if(blast){blast.transform.position=position;blast.transform.localScale=Vector3.one*BombBlastScale;Destroy(blast,3);}
+                pair.Value.gameObject.SetActive(false);any=true;
+            }
+            return any;
+        }
+        public const float BombBlastScale=.6f;
         private System.Collections.IEnumerator Pop(Transform badge)
         {
             var size=badge.localScale;
@@ -249,6 +302,32 @@ namespace FishOut
                 var c=colors[i];c.a=Mathf.Lerp(.45f,1f,wave);materials[i].color=c;
             }
         }
+    }
+    // Last-bump warning on a crab's bomb: a red shell over the black bomb that warms at 2 and pulses at 1.
+    // The shell uses "UI/Default" (always in the build) with normal depth testing, so the crab still covers it.
+    public sealed class FishOutCrabBomb : MonoBehaviour
+    {
+        public static readonly Color Danger=new Color(1f,.12f,.04f);
+        private Material heat;private int left=3;
+        public int Left=>left;
+        public float Heat=>heat?heat.color.a:0;
+        private void Awake()
+        {
+            var source=GetComponentInChildren<MeshFilter>();
+            if(!source||!source.sharedMesh)return;
+            var shell=new GameObject("Heat",typeof(MeshFilter),typeof(MeshRenderer));
+            shell.transform.SetParent(source.transform,false);shell.transform.localScale=Vector3.one*1.03f;
+            shell.GetComponent<MeshFilter>().sharedMesh=source.sharedMesh;
+            heat=new Material(Shader.Find("UI/Default")){name="Bomb heat",renderQueue=3050};
+            heat.SetInt("unity_GUIZTestMode",(int)CompareFunction.LessEqual);
+            var renderer=shell.GetComponent<MeshRenderer>();renderer.sharedMaterial=heat;
+            renderer.shadowCastingMode=ShadowCastingMode.Off;renderer.receiveShadows=false;
+            Apply(0);
+        }
+        public void SetLeft(int value){left=value;if(left>1)Apply(left==2?.22f:0);}
+        private void Update(){if(left<=1)Apply(Mathf.Lerp(.35f,.8f,.5f+.5f*Mathf.Sin(Time.time*Mathf.PI*2*2.2f)));}
+        private void Apply(float alpha){if(!heat)return;var c=Danger;c.a=alpha;heat.color=c;}
+        private void OnDestroy(){if(heat)Destroy(heat);}
     }
     public sealed class FishOutFaceCamera : MonoBehaviour
     {

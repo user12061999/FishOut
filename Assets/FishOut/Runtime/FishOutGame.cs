@@ -338,6 +338,16 @@ namespace FishOut
             for(float t=0;t<.25f;t+=Time.deltaTime){actor.transform.localScale=original*(1-t/.25f);yield return null;}
             world.actors.Remove(id);Destroy(actor.gameObject);locked=false;Refresh();ResolveBoard();
         }
+        public const float BombLoseDelay=.9f;
+        private IEnumerator LoseAfterBlast()
+        {
+            var board=Board;locked=true;
+            if(vibration)Handheld.Vibrate();
+            yield return new WaitForSeconds(BombLoseDelay);
+            if(Board!=board)yield break;
+            locked=false;ShowLose();
+        }
+        private void ShowLose()=>hud.Lose(Board.CrabExhausted?"A crab ran out of bumps!":"No way out for the fish!",()=>StartLevel(CurrentLevel),()=>ShowHome());
         private void ResolveBoard()
         {
             // Whatever closes the open dialog resolves the board again.
@@ -346,7 +356,9 @@ namespace FishOut
             if(Board.IsFailed)
             {
                 playing=false;audioPlayer.Play("fail");pointer.gameObject.SetActive(false);
-                hud.Lose(Board.CrabExhausted?"A crab ran out of bumps!":"No way out for the fish!",()=>StartLevel(CurrentLevel),()=>ShowHome());return;
+                // A crab that runs out of bumps sets its bomb off first; the lose screen follows once the blast has read.
+                if(Board.CrabExhausted&&world.ExplodeCrabs(Board)){StartCoroutine(LoseAfterBlast());return;}
+                ShowLose();return;
             }
             if(Board.IsDeadlocked)ShowDeadlock();
         }
