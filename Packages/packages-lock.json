@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.adjust.sdk": {
+      "version": "https://github.com/adjust/unity_sdk.git?path=Assets/Adjust#v5.8.2",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "add1627c6df6996565cc4374ed3cc813a9002a95"
+    },
     "com.coplaydev.unity-mcp": {
       "version": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
       "depth": 0,
