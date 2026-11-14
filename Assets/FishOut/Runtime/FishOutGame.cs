@@ -483,6 +483,9 @@ namespace FishOut
             foreach(var other in swimmers)
             {
                 if(other==fish||!other.OnRoad||other.InCave||other.Remaining>=fish.Remaining)continue;
+                // Where two roads merge, a fish just behind on the other road may already be waiting for this one;
+                // following it back would leave both waiting for each other at the merge.
+                if(Touching(other,fish)||Following(other,fish))continue;
                 float gap=fish.Remaining-other.Remaining;
                 if(gap>FollowRange*cell)continue;
                 // A fish on this one's route counts, and so does one right beside it where two roads merge;
