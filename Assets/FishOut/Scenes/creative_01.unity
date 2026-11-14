@@ -358,6 +358,9 @@ MonoBehaviour:
   patrolPause: 0.35
   crabSize: 1.25
   catchRadius: 0.6
+  failTitle: {fileID: 21300000, guid: 5cc88486f786c564191be9262ec03148, type: 3}
+  failPicture: {fileID: 21300000, guid: 900dbe41c46899447b54283c47a3cf50, type: 3}
+  tryAgainButton: {fileID: 21300000, guid: b214bd95cdd34664a82e2fef78fdba87, type: 3}
 --- !u!4 &767758907
 Transform:
   m_ObjectHideFlags: 0

@@ -152,6 +152,13 @@ namespace FishOut
         public float crabSize=1.25f;
         [Tooltip("A fish closer than this to a crab (in cells) is caught.")]
         public float catchRadius=.6f;
+        [Header("Fail screen art")]
+        [Tooltip("Title shown instead of YOU LOSE.")]
+        public Sprite failTitle;
+        [Tooltip("Picture shown instead of the 3D crab and knocked-out fish.")]
+        public Sprite failPicture;
+        [Tooltip("Picture used for the Try Again button.")]
+        public Sprite tryAgainButton;
         private FishOutGame game;
         private Canvas hudCanvas;
         private readonly List<Patrol> crabs=new List<Patrol>();
@@ -277,7 +284,8 @@ namespace FishOut
             yield return new WaitForSecondsRealtime(.6f);
             ShowLose();
         }
-        // The game's own lose card, restaged: dark veil over the board, a crab cheering over a knocked-out fish, a pulsing Try Again.
+        // The game's lose card, restaged with the partner's art: FAIL title, the crab holding a dizzy fish, a green
+        // TRY AGAIN that pulses. Without art it falls back to the 3D crab cheering over a knocked-out fish.
         private void ShowLose()
         {
             if(game.Hud.modal&&game.Hud.modal.name=="Stage failed")return;
@@ -286,13 +294,35 @@ namespace FishOut
             PlaySound("fail");
             game.Hud.Lose("",Restart,Restart);
             var card=game.Hud.modal;
-            if(card)
+            if(!card)return;
+            var veil=card.GetComponent<Image>();if(veil)veil.color=new Color(.02f,.03f,.12f,.86f);
+            var home=card.transform.Find("Button Home");if(home)home.gameObject.SetActive(false);
+            var again=card.transform.Find("Button Try Again") as RectTransform;
+            var mascot=card.transform.Find("Mascot") as RectTransform;
+            if(failTitle&&failPicture&&tryAgainButton)
             {
-                var veil=card.GetComponent<Image>();if(veil)veil.color=new Color(.02f,.03f,.12f,.86f);
-                var home=card.transform.Find("Button Home");if(home)home.gameObject.SetActive(false);
-                var again=card.transform.Find("Button Try Again");if(again)StartCoroutine(Pulse(again));
-                var mascot=card.transform.Find("Mascot");if(mascot)((RectTransform)mascot).sizeDelta=Vector2.one*820;
+                var title=card.transform.Find("Title YOU LOSE") as RectTransform;
+                if(title)
+                {
+                    // Art rides on the title so the HUD's reveal animation still pops it in.
+                    var text=title.GetComponent<Text>();if(text)text.enabled=false;
+                    Art(title,"Fail title",failTitle,new Vector2(0,-20),760);
+                }
+                if(mascot)mascot.gameObject.SetActive(false);
+                Art((RectTransform)card.transform,"Fail picture",failPicture,new Vector2(0,10),860);
+                if(again)
+                {
+                    // The button keeps its click area; only its look is swapped for the art.
+                    foreach(var graphic in again.GetComponentsInChildren<Graphic>(true))
+                        if(graphic.transform==again)graphic.color=new Color(1,1,1,0);else graphic.enabled=false;
+                    again.sizeDelta=new Vector2(640,214);
+                    Art(again,"Try again art",tryAgainButton,Vector2.zero,640);
+                    StartCoroutine(Pulse(again));
+                }
+                return;
             }
+            if(again)StartCoroutine(Pulse(again));
+            if(mascot)mascot.sizeDelta=Vector2.one*820;
             var stage=GameObject.Find("Mascot stage");
             if(!stage)return;
             var original=stage.transform.Find("Mascot");if(original)original.gameObject.SetActive(false);
@@ -309,6 +339,15 @@ namespace FishOut
                 star.transform.SetParent(stage.transform,false);star.transform.localScale=Vector3.one*.22f/Mathf.Max(.01f,star.sprite.bounds.size.x);stars[i]=star.transform;
             }
             StartCoroutine(Cheer(winner,loser,stars));
+        }
+        private static Image Art(RectTransform parent,string name,Sprite sprite,Vector2 position,float width)
+        {
+            var rect=new GameObject(name,typeof(RectTransform)).GetComponent<RectTransform>();
+            rect.SetParent(parent,false);rect.anchorMin=rect.anchorMax=new Vector2(.5f,.5f);
+            rect.anchoredPosition=position;
+            rect.sizeDelta=new Vector2(width,width*sprite.rect.height/Mathf.Max(1,sprite.rect.width));
+            var image=rect.gameObject.AddComponent<Image>();image.sprite=sprite;image.preserveAspect=true;image.raycastTarget=false;
+            return image;
         }
         private void ShowWin()
         {
