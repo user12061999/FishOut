@@ -92,11 +92,13 @@ namespace FishOut
             // Spec §6: the game opens on Home; on the first play PLAY starts Level 1.
             ShowHome();
         }
+        // Set by an ad scene (Creative 01) to play its own staged board instead of the campaign level.
+        public static System.Func<LevelData> CreativeLevel;
         private void RebuildBoard()
         {
             StopAllCoroutines(); locked=false;moving.Clear();swimmers.Clear();linePredecessor.Clear();selectingRescue=false;settings=false;tutorialTarget=-1;hintTarget=-1;guidedTaps=0;lessonActive=false;lineExplained=false;pointer.gameObject.SetActive(false);
             if(world){world.gameObject.SetActive(false);Destroy(world.gameObject);}
-            Board=new BoardState(FishOutLevels.Get(CurrentLevel));
+            Board=new BoardState(CreativeLevel!=null?CreativeLevel():FishOutLevels.Get(CurrentLevel));
             var root=new GameObject("Underwater board");root.transform.SetParent(transform,false);
             world=root.AddComponent<FishOutWorld>();world.Build(this,Board);
             FitCamera();
