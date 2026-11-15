@@ -94,6 +94,8 @@ namespace FishOut
         }
         // Set by an ad scene (Creative 01) to play its own staged board instead of the campaign level.
         public static System.Func<LevelData> CreativeLevel;
+        // Set by an ad scene (Creative 03) to refuse taps on some pieces, e.g. crabs that must stand still.
+        public static System.Func<int,bool> CreativeCanTap;
         private void RebuildBoard()
         {
             StopAllCoroutines(); locked=false;moving.Clear();swimmers.Clear();linePredecessor.Clear();selectingRescue=false;settings=false;tutorialTarget=-1;hintTarget=-1;guidedTaps=0;lessonActive=false;lineExplained=false;pointer.gameObject.SetActive(false);
@@ -212,6 +214,7 @@ namespace FishOut
         public void TapFish(int id)
         {
             if(!playing||locked||settings||hud.modal||Board.IsFailed||Board.IsClear||Board.Find(id)==null||moving.Contains(id)||FishMovingOnBoard)return;
+            if(CreativeCanTap!=null&&!CreativeCanTap(id))return;
             if(selectingRescue){StartCoroutine(RescueFish(id));return;}
             var move=Board.Preview(id);
             if(CurrentLevel==4&&move.CostsCrab&&!crabWarned)
