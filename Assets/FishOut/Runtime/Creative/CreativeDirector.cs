@@ -190,6 +190,8 @@ namespace FishOut
             while(game==null||game.Hud==null){yield return null;if(!game)game=FindFirstObjectByType<FishOutGame>();}
             yield return null;
             hudCanvas=game.Hud.GetComponent<Canvas>();
+            // An intro video (if the scene has one) plays first; the stage starts fresh when it ends.
+            while(CreativeIntroVideo.Playing)yield return null;
             Restart();
         }
         private void Restart()
@@ -207,6 +209,7 @@ namespace FishOut
             if(!modal&&Time.timeScale==0)Time.timeScale=1;
             // Every clear replays the same stage instead of moving on through the campaign.
             if(game.CurrentLevel!=CreativeLevel01.StageNumber&&!modal)typeof(FishOutGame).GetProperty("CurrentLevel").GetSetMethod(true).Invoke(game,new object[]{CreativeLevel01.StageNumber});
+            if(CreativeIntroVideo.Playing)return;
             if(patrolBoard!=game.Board)SpawnCrabs();
             MoveCrabs();
             if(KeyDown('Q'))ShowLose();

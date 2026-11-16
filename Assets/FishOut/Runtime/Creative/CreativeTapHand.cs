@@ -37,7 +37,7 @@ namespace FishOut
         private void Update()
         {
             // Nothing under an open end card (the ad freezes the game there).
-            if(Time.timeScale==0||!hand)return;
+            if(Time.timeScale==0||!hand||CreativeIntroVideo.Playing)return;
             if(!Pressed(out var screen))return;
             if(onlyOnPieces&&!OnPiece(screen))return;
             Show(screen);
