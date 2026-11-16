@@ -156,6 +156,21 @@ namespace FishOut
         public float endCardDelay=2f;
         [Tooltip("Camera shake strength on the blast, in world units.")]
         public float shakeStrength=.35f;
+        [Header("Bomb fuse (before the blast)")]
+        [Tooltip("Seconds the bomb waits after the fish has hit the crab, so the hit is seen first.")]
+        public float fuseDelay=.35f;
+        [Tooltip("Seconds the bomb shakes and pulses big-small before it goes off.")]
+        public float fuseTime=1.2f;
+        [Tooltip("How far the pulse grows the bomb at the end (0.45 = 45% bigger; it also dips a little smaller between pulses), and its shake in world units.")]
+        public float fusePulse=.45f,fuseShake=.07f;
+        [Tooltip("Pulses per second at the start and at the end of the fuse (it speeds up).")]
+        public float fuseRateStart=3f,fuseRateEnd=9f;
+        [Tooltip("Seconds the smoke takes to clear away once the end card is open.")]
+        public float smokeClearTime=1.2f;
+        [Header("Guide")]
+        [Tooltip("When only the trapped fish are left, the tap hand shows on one of them after this many idle seconds, and again every few seconds.")]
+        public bool guideTrapFish=true;
+        public float guideIdle=1.5f,guideEvery=2.5f;
         [Header("End cards (prefabs, edit them in Prefab Mode)")]
         public GameObject loseCardPrefab;
         public GameObject winCardPrefab;
@@ -173,11 +188,13 @@ namespace FishOut
             savedLevel=PlayerPrefs.GetInt("FishOut.Level",1);savedUnlocked=PlayerPrefs.GetInt("FishOut.Unlocked",1);
             FishOutGame.CreativeLevel=()=>CreativeLevel03.Build(new CreativeLevel03.Config{columns=gridColumns,rows=gridRows,fishCount=fishCount,firstRow=firstFishRow,lastRow=lastFishRow,looks=fishLooks});
             // The crabs stand still: taps on them (or near them) do nothing, and nothing is tapped during the intro.
-            FishOutGame.CreativeCanTap=id=>!intro&&!ended&&game!=null&&!game.Board.IsCrab(id);
+            // The stage is lost only when a bomb goes off: with just the trapped fish left the player taps them into the crabs.
+            BoardState.CreativeBombLoseOnly=true;
+            FishOutGame.CreativeCanTap=id=>!CreativeIntroVideo.Playing&&!intro&&!ended&&game!=null&&!game.Board.IsCrab(id);
         }
         private void OnDestroy()
         {
-            FishOutGame.CreativeLevel=null;FishOutGame.CreativeCanTap=null;Time.timeScale=1;
+            FishOutGame.CreativeLevel=null;FishOutGame.CreativeCanTap=null;BoardState.CreativeBombLoseOnly=false;Time.timeScale=1;
             PlayerPrefs.SetInt("FishOut.Level",savedLevel);PlayerPrefs.SetInt("FishOut.Unlocked",savedUnlocked);PlayerPrefs.Save();
         }
         private IEnumerator Start()
@@ -186,6 +203,8 @@ namespace FishOut
             while(game==null||game.Hud==null){yield return null;if(!game)game=FindFirstObjectByType<FishOutGame>();}
             yield return null;
             hudCanvas=game.Hud.GetComponent<Canvas>();
+            // An intro video (if the scene has one) plays first; the stage and its camera intro start when it ends.
+            while(CreativeIntroVideo.Playing)yield return null;
             Restart();
         }
         private void Restart()
@@ -202,11 +221,39 @@ namespace FishOut
             if(game==null||game.Board==null)return;
             // The ad has no HUD at all: its end screens are the card prefabs on their own canvas.
             if(hudCanvas&&hudCanvas.enabled)hudCanvas.enabled=false;
+            if(CreativeIntroVideo.Playing)return;
             if(game.CurrentLevel!=CreativeLevel03.StageNumber&&!ended)typeof(FishOutGame).GetProperty("CurrentLevel").GetSetMethod(true).Invoke(game,new object[]{CreativeLevel03.StageNumber});
             if(stagedBoard!=game.Board)Stage();
             if(KeyDown('Q'))ShowLose(true);
             else if(KeyDown('W'))ShowWin();
             else if(!ended&&game.Board.IsFailed)StartCoroutine(Blast());
+            else Guide();
+        }
+        private float idle,sinceGuide;
+        private CreativeTapHand hand;
+        // Only the trapped fish left: after a short idle the hand taps one of them, the one nearest a crab.
+        private void Guide()
+        {
+            if(!guideTrapFish||ended||intro||FishMoving()){idle=0;sinceGuide=guideEvery;return;}
+            idle+=Time.deltaTime;sinceGuide+=Time.deltaTime;
+            if(idle<guideIdle||sinceGuide<guideEvery)return;
+            int target=-1;float best=float.MaxValue;
+            foreach(var pair in game.World.actors)
+            {
+                if(!pair.Value||game.Board.IsCrab(pair.Key))continue;
+                var move=game.Board.Preview(pair.Key);
+                if(move.ChangesBoard&&!move.CostsCrab)return;
+                if(!move.CostsCrab)continue;
+                float distance=float.MaxValue;
+                foreach(var crab in Crabs())distance=Mathf.Min(distance,(crab.transform.position-pair.Value.transform.position).sqrMagnitude);
+                if(distance<best){best=distance;target=pair.Key;}
+            }
+            if(target<0)return;
+            if(!hand)hand=FindFirstObjectByType<CreativeTapHand>();
+            var cam=game.boardCamera;
+            if(!hand||!cam)return;
+            hand.Show(cam.WorldToScreenPoint(game.World.actors[target].transform.position));
+            sinceGuide=0;
         }
         private static bool KeyDown(char key)
         {
@@ -267,6 +314,17 @@ namespace FishOut
             FishActor crab=null;int least=int.MaxValue;
             foreach(var c in Crabs()){int left=game.Board.CrabLeft(c.Id);if(left<least){least=left;crab=c;}}
             var cam=game.boardCamera;
+            var fused=crab?crab.transform.Find("Crab bomb"):null;
+            // The board fails the moment the tap is made, while the fish is still swimming at the crab. The game's own
+            // small bomb blast would go off on the hit; this ad keeps the bomb, waits for the hit, then lights the fuse.
+            if(fused&&least<=0)TakeBombFromGame(crab.Id);
+            for(float t=0;t<4&&FishMoving();t+=Time.deltaTime)yield return null;
+            if(fused&&least<=0)
+            {
+                var counter=fused.GetComponent<FishOutCrabBomb>();if(counter)counter.SetLeft(0);
+                for(float t=0;t<fuseDelay;t+=Time.deltaTime)yield return null;
+                yield return Fuse(fused);
+            }
             var at=crab?crab.transform.position:Vector3.zero;
             Spawn(blastPrefab,Lift(cam,at+Vector3.up*.4f),blastScale,1,1);
             Spawn(smokePrefab,Lift(cam,at+Vector3.up*.3f),smokeScale,smokeSpread,smokeLinger);
@@ -291,6 +349,34 @@ namespace FishOut
             }
             for(float t=elapsed;t<endCardDelay;t+=Time.deltaTime)yield return null;
             ShowLose(false);
+        }
+        // The bomb shakes harder and pulses big-small faster and faster, then swells once and goes off.
+        private IEnumerator Fuse(Transform bomb)
+        {
+            var size=bomb.localScale;var home=bomb.localPosition;float phase=0;
+            for(float t=0;t<fuseTime&&bomb;t+=Time.deltaTime)
+            {
+                float k=t/Mathf.Max(.01f,fuseTime);
+                phase+=Time.deltaTime*Mathf.Lerp(fuseRateStart,fuseRateEnd,k)*Mathf.PI*2;
+                float grow=Mathf.Lerp(.4f,1f,k)*fusePulse*(.35f+.65f*Mathf.Sin(phase))+(k>.85f?(k-.85f)/.15f*fusePulse:0);
+                bomb.localScale=size*(1+grow);
+                bomb.localPosition=home+bomb.parent.InverseTransformVector(Random.insideUnitSphere*fuseShake*Mathf.Lerp(.4f,1f,k));
+                yield return null;
+            }
+            if(bomb){bomb.localScale=size;bomb.localPosition=home;}
+        }
+        private bool FishMoving()
+        {
+            var field=typeof(FishOutGame).GetField("moving",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
+            var set=field!=null?field.GetValue(game) as ICollection<int>:null;
+            return set!=null&&set.Count>0;
+        }
+        // Removes the crab's bomb from the game's list, so the game's own blast on the hit leaves it alone.
+        private void TakeBombFromGame(int crabId)
+        {
+            var field=typeof(FishOutWorld).GetField("crabBombs",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
+            var bombs=field!=null?field.GetValue(game.World) as System.Collections.IDictionary:null;
+            if(bombs!=null&&bombs.Contains(crabId))bombs.Remove(crabId);
         }
         // Moved toward the camera along its own view line: the spot stays where it is on screen (the camera is
         // orthographic), but the huge smoke no longer cuts into the sea floor and the scenery, which hid part of it.
@@ -329,6 +415,31 @@ namespace FishOut
             // A real loss already played the fail jingle with the game's own fail logic.
             if(fromKey)PlaySound("fail");
             OpenCard(loseCardPrefab,"Lose card");
+            StartCoroutine(ClearEffects());
+        }
+        // The game stands still under the card (time scale 0), so the smoke runs on real time and fades away
+        // instead of freezing over the board.
+        private IEnumerator ClearEffects()
+        {
+            var systems=new List<ParticleSystem>();
+            foreach(var effect in effects)if(effect)systems.AddRange(effect.GetComponentsInChildren<ParticleSystem>());
+            foreach(var system in systems){var main=system.main;main.useUnscaledTime=true;system.Stop(true,ParticleSystemStopBehavior.StopEmitting);}
+            var buffer=new ParticleSystem.Particle[256];float shown=1;
+            for(float t=0;t<smokeClearTime;t+=Time.unscaledDeltaTime)
+            {
+                float next=1-t/Mathf.Max(.01f,smokeClearTime),ratio=next/Mathf.Max(.001f,shown);shown=next;
+                foreach(var system in systems)
+                {
+                    if(!system)continue;
+                    if(buffer.Length<system.particleCount)buffer=new ParticleSystem.Particle[system.particleCount];
+                    int count=system.GetParticles(buffer);
+                    for(int i=0;i<count;i++){var c=buffer[i].startColor;c.a=(byte)Mathf.Clamp(Mathf.FloorToInt(c.a*ratio),0,255);buffer[i].startColor=c;}
+                    system.SetParticles(buffer,count);
+                }
+                yield return null;
+            }
+            foreach(var effect in effects)if(effect)Destroy(effect);
+            effects.Clear();
         }
         private void ShowWin()
         {

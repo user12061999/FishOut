@@ -85,6 +85,9 @@ namespace FishOut
         public bool IsClear => fish.Count == 0;
         public bool CrabExhausted => crabLeft.Values.Any(n => n <= 0);
         // Lost when no sequence of taps (plus the Rescue still in hand) can bring every piece to the cave.
+        // Ad scenes that end only on a crab bomb: the board never counts as lost or stuck because the fish left
+        // cannot all get out (they can still be tapped into a crab).
+        public static bool CreativeBombLoseOnly;
         public bool NoWayOut { get; private set; }
         public bool IsFailed => CrabExhausted || NoWayOut;
         public int CrabLeft(int id) => crabLeft.TryGetValue(id, out var n) ? n : 0;
@@ -221,7 +224,7 @@ namespace FishOut
             {
                 if (IsClear || IsFailed) return false;
                 // Spec: deadlocked when no piece can move or escape (bumping into something moves nothing).
-                foreach (var f in fish) if (Preview(f.id).ChangesBoard) return false;
+                foreach (var f in fish) { var move = Preview(f.id); if (move.ChangesBoard || (CreativeBombLoseOnly && move.CostsCrab)) return false; }
                 return true;
             }
         }
@@ -230,7 +233,7 @@ namespace FishOut
         // is never taken, and taps that move nothing are skipped. If the search runs out of budget the board counts as
         // still solvable, so a player is never failed by mistake.
         private const int SearchBudget = 6000;
-        private void Reassess() { NoWayOut = fish.Count > 0 && !CrabExhausted && !CanClear(); }
+        private void Reassess() { NoWayOut = !CreativeBombLoseOnly && fish.Count > 0 && !CrabExhausted && !CanClear(); }
         public bool CanClear()
         {
             var n = fish.Count;
