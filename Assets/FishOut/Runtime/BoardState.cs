@@ -79,6 +79,9 @@ namespace FishOut
         public LevelData Level { get; }
         // Each crab carries a number: every bump counts it down, and the stage is lost when one reaches 0.
         public const int CrabStrength = 3;
+        // Ad scenes (Creative 05): one bump counts every crab down together, and the dead-end search is skipped
+        // (pieces leave in whole chains there, which the search does not model).
+        public static bool SharedCrabBumps, SkipDeadEndSearch;
         public bool HintUsed { get; private set; }
         public bool RescueUsed { get; private set; }
         // Fish and crabs alike must reach the cave.
@@ -165,8 +168,13 @@ namespace FishOut
         {
             if (IsFailed || IsClear) throw new InvalidOperationException("Stage has ended");
             var result = TraceForward(id, null);
-            if (result.hitsCrab) Bump(result.struckId);
-            if (result.crabStops) Bump(id);
+            if (SharedCrabBumps && result.CostsCrab)
+                foreach (var crab in crabLeft.Keys.ToList()) Bump(crab);
+            else
+            {
+                if (result.hitsCrab) Bump(result.struckId);
+                if (result.crabStops) Bump(id);
+            }
             if (result.exits) { fish.Remove(Find(id)); crabLeft.Remove(id); }
             else Find(id).cell = result.to;
             Reassess();
@@ -215,6 +223,16 @@ namespace FishOut
             Reassess();
             return true;
         }
+        // Takes a piece off the board at once (Creative 05: the rest of a chain leaving with the piece that was tapped).
+        public bool Vanish(int id)
+        {
+            var f = Find(id);
+            if (f == null) return false;
+            fish.Remove(f);
+            crabLeft.Remove(id);
+            Reassess();
+            return true;
+        }
         public bool IsDeadlocked
         {
             get
@@ -230,7 +248,7 @@ namespace FishOut
         // is never taken, and taps that move nothing are skipped. If the search runs out of budget the board counts as
         // still solvable, so a player is never failed by mistake.
         private const int SearchBudget = 6000;
-        private void Reassess() { NoWayOut = fish.Count > 0 && !CrabExhausted && !CanClear(); }
+        private void Reassess() { NoWayOut = !SkipDeadEndSearch && fish.Count > 0 && !CrabExhausted && !CanClear(); }
         public bool CanClear()
         {
             var n = fish.Count;
