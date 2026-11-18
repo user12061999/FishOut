@@ -26,6 +26,11 @@ namespace FishOut
         [Tooltip("Where a fish ends, deep in the cave behind the arch (pixels). The second cave point is the cave mouth.")]
         public Vector2 caveHidden = new Vector2(643f, 40f);
 
+        [Tooltip("Camera zoom on the painting (1 = whole painting; below 1 moves closer, around the screen centre).")]
+        [Range(.6f, 1.2f)] public float cameraZoom = 1f;
+        [Tooltip("Moves the view sideways, as a share of the painting's width (− shows more of the left).")]
+        [Range(-.2f, .2f)] public float cameraShift;
+
         [Tooltip("Swimming speed on the board, as a share of the original speed (1 = original).")]
         [Range(.2f, 1f)] public float boardSpeed = .7f;
         [Tooltip("Swimming speed on the sand road after leaving the board, as a share of the original speed. Never faster than on the board.")]

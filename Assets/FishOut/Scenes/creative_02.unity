@@ -460,10 +460,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: FishOut.Runtime::FishOut.CreativeDirector02
   gridColumns: 12
-  gridRows: 14
+  gridRows: 15
   octopusCount: 95
   firstRow: 1
-  lastRow: 14
+  lastRow: 15
   redShare: 0.5
   blueLighten: 0.35
   trailColor: {r: 0, g: 0, b: 0, a: 1}

@@ -10,11 +10,11 @@ namespace FishOut
     {
         public static bool Enabled = true;
         private const string Resource = "Backdrop/SeaBackdrop";
-        public static readonly Vector2 ImageSize = new Vector2(1411, 2508);
-        // The first painting (941 x 1672) sits unchanged at this offset inside the extended one (reef and road painted
-        // around it). The camera frames its height and FrameWidth of the whole width, so the road shows on both sides.
-        public static readonly Vector2 Inset = new Vector2(235, 418), InnerSize = new Vector2(941, 1672);
-        public const float FrameWidth = 1210f / 1411f;
+        public static readonly Vector2 ImageSize = new Vector2(1536, 2752);
+        // Seabed v4 (owner 18/11, 1536 x 2752): one full painting, framed whole (road on both sides already inside it).
+        // Inset/InnerSize mark the framed part; CaveFront.png is the painting's top strip at full width.
+        public static readonly Vector2 Inset = new Vector2(0, 0), InnerSize = new Vector2(1536, 2752);
+        public const float FrameWidth = 1f;
         private static float ImageAspect => ImageSize.y / ImageSize.x;
         // Hand-tuned fit (corners, rounding, road, cave), editable in the Fish Out menu; defaults if the asset is missing.
         private static BoardCalibration calibration;
@@ -530,6 +530,9 @@ namespace FishOut
             // stays near the top bar and the board sits clear of the bottom buttons.
             float extra = camera.orthographicSize - screenDepth * .5f * .99f;
             if (extra > 0) camera.transform.position -= camera.transform.up * extra * ExtraBelow;
+            // Per-scene framing picked by hand in the Game view (owner 18/11): zoom about the screen centre, then slide sideways.
+            camera.orthographicSize *= Calibration.cameraZoom;
+            camera.transform.position += Vector3.right * layout.width * Calibration.cameraShift;
         }
     }
 }
