@@ -360,7 +360,7 @@ namespace FishOut
             if(sprite)
             {
                 var r=new GameObject("Crying emoji").AddComponent<SpriteRenderer>();r.sprite=sprite;
-                r.transform.SetParent(stage.transform,false);r.transform.localScale=Vector3.one*.62f/Mathf.Max(.01f,sprite.bounds.size.x);
+                r.transform.SetParent(stage.transform,false);r.transform.localScale=Vector3.one*.5f/Mathf.Max(.01f,sprite.bounds.size.x);
                 emoji=r.transform;
             }
             StartCoroutine(Sob(octopus,emoji));
@@ -408,7 +408,7 @@ namespace FishOut
             }
             return holder;
         }
-        // Sobbing: head bowed toward the viewer, shoulders shaking, the emoji bobbing over its head.
+        // Sobbing: head bowed toward the viewer, shoulders shaking, the emoji bobbing beside its head.
         private IEnumerator Sob(Transform octopus,Transform emoji)
         {
             for(float t=0;octopus;t+=Time.unscaledDeltaTime)
@@ -417,7 +417,9 @@ namespace FishOut
                 octopus.localPosition=new Vector3(0,-.3f+sob*.04f,.2f);
                 octopus.localRotation=Quaternion.Euler(14+sob*4,180+Mathf.Sin(t*2f)*8,Mathf.Sin(t*14f)*3);
                 octopus.localScale=new Vector3(1+sob*.04f,1-sob*.05f,1);
-                if(emoji)emoji.localPosition=new Vector3(.45f,.85f+Mathf.Sin(t*4f)*.05f,-.1f);
+                // Below the FAIL title (partner note: nothing may overlap it), beside the octopus's head and in front of it
+                // (nearer the camera than the bowed head, so smaller to look the same size).
+                if(emoji)emoji.localPosition=new Vector3(.4f,.51f+Mathf.Sin(t*4f)*.03f,-.8f);
                 yield return null;
             }
         }
