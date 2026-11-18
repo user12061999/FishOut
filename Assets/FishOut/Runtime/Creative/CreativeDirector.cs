@@ -312,7 +312,8 @@ namespace FishOut
                     Art(title,"Fail title",failTitle,new Vector2(0,-20),760);
                 }
                 if(mascot)mascot.gameObject.SetActive(false);
-                Art((RectTransform)card.transform,"Fail picture",failPicture,new Vector2(0,10),860);
+                // Smaller and lower than first drawn, so the crab's raised claw stays clear of the FAIL title (partner note 18/11).
+                Art((RectTransform)card.transform,"Fail picture",failPicture,new Vector2(0,-20),760);
                 if(again)
                 {
                     // The button keeps its click area; only its look is swapped for the art.

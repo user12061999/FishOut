@@ -10,7 +10,11 @@ namespace FishOut
     {
         public static bool Enabled = true;
         private const string Resource = "Backdrop/SeaBackdrop";
-        public static readonly Vector2 ImageSize = new Vector2(941, 1672);
+        public static readonly Vector2 ImageSize = new Vector2(1536, 2752);
+        // Seabed v4 (owner 18/11, 1536 x 2752): one full painting, framed whole (road on both sides already inside it).
+        // Inset/InnerSize mark the framed part; CaveFront.png is the painting's top strip at full width.
+        public static readonly Vector2 Inset = new Vector2(0, 0), InnerSize = new Vector2(1536, 2752);
+        public const float FrameWidth = 1f;
         private static float ImageAspect => ImageSize.y / ImageSize.x;
         // Hand-tuned fit (corners, rounding, road, cave), editable in the Fish Out menu; defaults if the asset is missing.
         private static BoardCalibration calibration;
@@ -336,11 +340,13 @@ namespace FishOut
         {
             var texture = Resources.Load<Texture2D>(CaveFrontResource);
             if (!texture || !shader || !shader.isSupported) return;
-            float bottom = texture.height / ImageSize.y * (ImageSize.x / texture.width);
+            // CaveFront.png covers the top strip of the first painting, which now sits at Inset.
+            float left = Inset.x / ImageSize.x, right = (Inset.x + InnerSize.x) / ImageSize.x, top = Inset.y / ImageSize.y;
+            float bottom = (Inset.y + texture.height * (InnerSize.x / texture.width)) / ImageSize.y;
             var go = new GameObject("Cave front", typeof(MeshFilter), typeof(MeshRenderer));
             go.transform.SetParent(parent, false);
             var mesh = new Mesh { name = "Cave front" };
-            mesh.SetVertices(new List<Vector3> { ImageToWorld(level, new Vector2(0, bottom), -.2f), ImageToWorld(level, new Vector2(0, 0), -.2f), ImageToWorld(level, new Vector2(1, 0), -.2f), ImageToWorld(level, new Vector2(1, bottom), -.2f) });
+            mesh.SetVertices(new List<Vector3> { ImageToWorld(level, new Vector2(left, bottom), -.2f), ImageToWorld(level, new Vector2(left, top), -.2f), ImageToWorld(level, new Vector2(right, top), -.2f), ImageToWorld(level, new Vector2(right, bottom), -.2f) });
             mesh.SetUVs(0, new List<Vector2> { new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0) });
             mesh.SetTriangles(new[] { 0, 1, 2, 0, 2, 3 }, 0); mesh.RecalculateNormals(); mesh.RecalculateBounds();
             meshes.Add(mesh); go.GetComponent<MeshFilter>().sharedMesh = mesh;
@@ -510,11 +516,12 @@ namespace FishOut
         {
             var layout = Compute(level);
             var rotation = Quaternion.Euler(layout.pitch, 0, 0);
-            float screenDepth = layout.depth * Mathf.Sin(layout.pitch * Mathf.Deg2Rad);
+            float screenDepth = layout.depth * Mathf.Sin(layout.pitch * Mathf.Deg2Rad) * (InnerSize.y / ImageSize.y);
+            float frameWidth = layout.width * FrameWidth;
             camera.rect = new Rect(0, 0, 1, 1);
             // Slightly inside the painting on both axes where the screen allows it. A screen narrower than the painting
             // (20:9 phones) would crop the board's sides, so there the whole width is kept and the mirrored overscan fills above and below.
-            camera.orthographicSize = Mathf.Max(Mathf.Min(screenDepth * .5f, layout.width / (2 * aspect)) * .99f, layout.width * VisibleWidth / (2 * aspect));
+            camera.orthographicSize = Mathf.Max(Mathf.Min(screenDepth * .5f, frameWidth / (2 * aspect)) * .99f, frameWidth * VisibleWidth / (2 * aspect));
             camera.transform.rotation = rotation;
             // Aim at the painting's own plane (it lies below the board), otherwise the tilt shifts it down and
             // leaves a strip of background colour along the top of the screen.
@@ -523,6 +530,9 @@ namespace FishOut
             // stays near the top bar and the board sits clear of the bottom buttons.
             float extra = camera.orthographicSize - screenDepth * .5f * .99f;
             if (extra > 0) camera.transform.position -= camera.transform.up * extra * ExtraBelow;
+            // Per-scene framing picked by hand in the Game view (owner 18/11): zoom about the screen centre, then slide sideways.
+            camera.orthographicSize *= Calibration.cameraZoom;
+            camera.transform.position += Vector3.right * layout.width * Calibration.cameraShift;
         }
     }
 }

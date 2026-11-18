@@ -38,6 +38,7 @@ namespace FishOut
         private RenderTexture target;
         private GameObject screen;
         private bool finished;
+        private float waited,played;
 
         private void Awake()
         {
@@ -78,16 +79,24 @@ namespace FishOut
             player.timeUpdateMode=VideoTimeUpdateMode.UnscaledGameTime;
             player.audioOutputMode=playSound?VideoAudioOutputMode.Direct:VideoAudioOutputMode.None;
             if(playSound)for(ushort track=0;track<video.audioTrackCount;track++){player.EnableAudioTrack(track,true);player.SetDirectAudioVolume(track,volume);}
-            player.prepareCompleted+=source=>{picture.color=Color.white;source.Play();};
+            player.prepareCompleted+=source=>{picture.color=Color.white;source.Play();played=0;};
             player.loopPointReached+=source=>Finish();
             player.errorReceived+=(source,message)=>{Debug.LogWarning("Intro video: "+message);Finish();};
             player.Prepare();
         }
         private void Update()
         {
-            if(!Playing||finished||!tapToSkip)return;
-            if(Pressed())Finish();
+            if(!Playing||finished||!player)return;
+            if(tapToSkip&&Pressed()){Finish();return;}
+            // A clip that never gets ready (bad file, unsupported codec) must not hold the ad on a black screen.
+            if(!player.isPrepared){waited+=Time.unscaledDeltaTime;if(waited>PrepareTimeout)Finish();return;}
+            // The end event is not reliable: some clips stop on their second-to-last frame and never report the end.
+            // So the video also counts as over at its last fraction of a second, or after its length plus a margin.
+            played+=Time.unscaledDeltaTime;
+            double length=video.length;
+            if(player.time>=length-EndMargin||played>length+StallMargin)Finish();
         }
+        private const float PrepareTimeout=6,EndMargin=.12f,StallMargin=1.5f;
         private void Finish()
         {
             if(finished)return;

@@ -608,11 +608,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a19346d77f4ef84e89653be2950b88d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishOut.Runtime::FishOut.CreativeDirector
-  gridColumns: 8
-  gridRows: 10
-  fishCount: 17
+  gridColumns: 12
+  gridRows: 15
+  fishCount: 65
   firstFishRow: 4
-  lastFishRow: 7
+  lastFishRow: 12
   blueShare: 0.35
   crabFaceYaw: 180
   patrolSpeed: 1.1
