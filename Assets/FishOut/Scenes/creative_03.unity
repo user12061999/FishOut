@@ -511,11 +511,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 751d40c362d23f24f9054933562fa8ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishOut.Runtime::FishOut.CreativeDirector03
-  gridColumns: 8
-  gridRows: 10
-  fishCount: 40
-  firstFishRow: 2
-  lastFishRow: 9
+  gridColumns: 12
+  gridRows: 14
+  fishCount: 75
+  firstFishRow: 0
+  lastFishRow: 14
   fishLooks: 0000000002000000
   crabScale: 1.5
   introZoom: 0.45
@@ -532,6 +532,16 @@ MonoBehaviour:
   effectLift: 15
   endCardDelay: 2
   shakeStrength: 0.35
+  fuseDelay: 0.35
+  fuseTime: 1.2
+  fusePulse: 0.45
+  fuseShake: 0.07
+  fuseRateStart: 3
+  fuseRateEnd: 9
+  smokeClearTime: 1.2
+  guideTrapFish: 1
+  guideIdle: 1.5
+  guideEvery: 2.5
   loseCardPrefab: {fileID: 5781790445899416406, guid: e23cde4212990db44991d84bfde1c854, type: 3}
   winCardPrefab: {fileID: 1648424363130813267, guid: e0ab9c8e272c9354097578e8dc4d3bd7, type: 3}
 --- !u!1 &1154984862
